@@ -1,17 +1,17 @@
 /* ==========================================================================
-   EduVault - Professional Academic & Study Hub Design System
-   Minimalist, Ultra-Clean, High-Readability Dark Theme
+   EduVault - Modern Academic Drive Design System
+   Clean, Minimalist, Single-Hub Folder & Study File Manager
    ========================================================================== */
 
 :root {
-  /* Surface & Background Colors */
+  /* Surfaces & Backgrounds */
   --bg-deep: #080c14;
   --bg-surface: #0f172a;
   --bg-card: rgba(18, 26, 43, 0.75);
   --bg-card-hover: rgba(30, 41, 65, 0.85);
   --bg-input: #0b1120;
 
-  /* Academic Color Palette */
+  /* Accent Colors */
   --mint: #2dd4bf;
   --mint-hover: #14b8a6;
   --mint-glow: rgba(45, 212, 191, 0.25);
@@ -19,10 +19,10 @@
   --sky: #38bdf8;
   --sky-glow: rgba(56, 189, 248, 0.25);
 
-  --indigo: #818cf8;
-  --indigo-glow: rgba(129, 140, 248, 0.25);
+  --amber: #fbbf24;
+  --amber-glow: rgba(251, 191, 36, 0.25);
 
-  --amber: #f59e0b;
+  --indigo: #818cf8;
   --rose: #f43f5e;
   --emerald: #10b981;
 
@@ -32,20 +32,18 @@
   --text-muted: #94a3b8;
   --text-sub: #64748b;
 
-  /* Borders & Shadows */
+  /* Borders & Radii */
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-card: rgba(255, 255, 255, 0.12);
-  --border-focus: rgba(45, 212, 191, 0.5);
-
   --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
   --radius-full: 9999px;
 
+  /* Shadows */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
-  --shadow-glow: 0 0 20px var(--mint-glow);
 
   /* Fonts */
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -116,7 +114,7 @@ body {
 }
 
 /* ==========================================================================
-   Header & Navigation
+   Header & Action Cluster
    ========================================================================== */
 
 .app-header {
@@ -127,7 +125,7 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 0.65rem 1.5rem;
+  padding: 0.75rem 1.5rem;
 }
 
 .header-inner {
@@ -148,8 +146,8 @@ body {
 }
 
 .brand-icon {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   background: linear-gradient(135deg, var(--mint) 0%, var(--sky) 100%);
   border-radius: var(--radius-md);
   display: flex;
@@ -190,7 +188,7 @@ body {
 /* Center Search */
 .header-search-wrapper {
   flex: 1;
-  max-width: 480px;
+  max-width: 460px;
 }
 
 .header-search {
@@ -213,7 +211,7 @@ body {
   color: var(--text-main);
   font-family: inherit;
   font-size: 0.825rem;
-  padding: 0.45rem 2.8rem 0.45rem 2.4rem;
+  padding: 0.45rem 1rem 0.45rem 2.4rem;
   border-radius: var(--radius-full);
   outline: none;
   transition: var(--transition-smooth);
@@ -223,17 +221,6 @@ body {
   border-color: var(--mint);
   box-shadow: 0 0 0 3px var(--mint-glow);
   background: #0f172a;
-}
-
-.search-shortcut {
-  position: absolute;
-  right: 0.75rem;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-muted);
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
 }
 
 /* Unified Action Cluster */
@@ -327,122 +314,7 @@ body {
 }
 
 /* ==========================================================================
-   Sub-Header (Module Navigation & Subject Filter Pills)
-   ========================================================================== */
-
-.sub-header {
-  background: rgba(15, 23, 42, 0.5);
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 0.5rem 1.5rem;
-}
-
-.sub-header-inner {
-  max-width: 1440px;
-  margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-/* Module Tabs */
-.module-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.module-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 0.825rem;
-  font-weight: 600;
-  padding: 0.4rem 0.85rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.module-tab:hover {
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.module-tab.active {
-  color: #fff;
-  background: #1e293b;
-  border: 1px solid var(--border-card);
-  box-shadow: var(--shadow-sm);
-}
-
-/* Subject Pills Bar */
-.subject-pills-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  overflow-x: auto;
-  padding: 0.2rem 0;
-}
-
-.filter-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-sub);
-  margin-right: 0.2rem;
-}
-
-.subject-pill {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: var(--transition-fast);
-}
-
-.subject-pill:hover {
-  color: var(--text-main);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.subject-pill.active {
-  background: rgba(45, 212, 191, 0.15);
-  color: var(--mint);
-  border-color: rgba(45, 212, 191, 0.4);
-}
-
-.subject-pill-add {
-  background: transparent;
-  border: 1px dashed var(--border-subtle);
-  color: var(--text-sub);
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  cursor: pointer;
-}
-
-.subject-pill-add:hover {
-  color: var(--mint);
-  border-color: var(--mint);
-}
-
-/* ==========================================================================
-   Workspace Layout & Tabs
+   Workspace Toolbar (Breadcrumbs & Actions)
    ========================================================================== */
 
 .workspace-container {
@@ -452,24 +324,6 @@ body {
   position: relative;
   z-index: 1;
 }
-
-.tab-content {
-  display: none;
-}
-
-.tab-content.active {
-  display: block;
-  animation: fadeIn 0.25s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ==========================================================================
-   Tab 1: Study Drive (Kho Tài Liệu)
-   ========================================================================== */
 
 .workspace-toolbar {
   display: flex;
@@ -483,7 +337,7 @@ body {
   border: 1px solid var(--border-card);
   border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 /* Breadcrumbs */
@@ -499,14 +353,15 @@ body {
   border: none;
   color: var(--text-muted);
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: 0.825rem;
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.2rem 0.5rem;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
   border-radius: var(--radius-xs);
   cursor: pointer;
+  transition: var(--transition-fast);
 }
 
 .bc-item:hover {
@@ -517,6 +372,7 @@ body {
 .bc-item.active {
   color: var(--text-main);
   background: #1e293b;
+  border: 1px solid var(--border-subtle);
 }
 
 .bc-sep {
@@ -524,30 +380,12 @@ body {
   font-size: 0.65rem;
 }
 
-/* Toolbar Right Tools */
+/* Toolbar Actions */
 .toolbar-tools {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
-}
-
-.clean-select {
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 0.775rem;
-  font-weight: 600;
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--radius-sm);
-  outline: none;
-  cursor: pointer;
-}
-
-.clean-select option {
-  background: var(--bg-surface);
-  color: var(--text-main);
 }
 
 .view-switch {
@@ -573,7 +411,6 @@ body {
   color: var(--text-main);
 }
 
-/* Action Buttons */
 .btn-primary-action {
   display: inline-flex;
   align-items: center;
@@ -651,9 +488,15 @@ body {
   cursor: pointer;
 }
 
-/* Compact Smart Dropzone */
+.text-amber { color: var(--amber) !important; }
+.text-mint { color: var(--mint) !important; }
+
+/* ==========================================================================
+   Dropzone (Drag & Drop)
+   ========================================================================== */
+
 .study-dropzone {
-  background: rgba(18, 26, 43, 0.5);
+  background: rgba(18, 26, 43, 0.4);
   border: 2px dashed rgba(45, 212, 191, 0.35);
   border-radius: var(--radius-md);
   padding: 1.25rem 1.5rem;
@@ -751,7 +594,10 @@ body {
   transition: width 0.25s ease;
 }
 
-/* File Grid & Cards */
+/* ==========================================================================
+   File & Folder Grid & Card Styles
+   ========================================================================== */
+
 .study-file-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -787,6 +633,11 @@ body {
   border-left: 3px solid var(--amber);
 }
 
+.study-card.folder:hover {
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 0 14px var(--amber-glow);
+}
+
 .card-top {
   display: flex;
   align-items: center;
@@ -817,7 +668,7 @@ body {
 .type-code { background: rgba(56, 189, 248, 0.15); color: var(--sky); }
 .type-notes { background: rgba(45, 212, 191, 0.15); color: var(--mint); }
 .type-image { background: rgba(129, 140, 248, 0.15); color: var(--indigo); }
-.type-folder { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+.type-folder { background: rgba(251, 191, 36, 0.15); color: var(--amber); }
 
 .card-filename {
   font-size: 0.85rem;
@@ -869,7 +720,7 @@ body {
   color: #080c14;
 }
 
-/* List View Card */
+/* List View */
 .study-file-grid.list-view .study-card {
   flex-direction: row;
   align-items: center;
@@ -914,8 +765,8 @@ body {
 .empty-icon-box {
   width: 64px;
   height: 64px;
-  background: rgba(45, 212, 191, 0.1);
-  color: var(--mint);
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--amber);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -950,403 +801,6 @@ body {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* ==========================================================================
-   Tab 2: Markdown Study Notes (Sổ Tay Ghi Chú)
-   ========================================================================== */
-
-.notes-workspace {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 1.25rem;
-  height: calc(100vh - 200px);
-  min-height: 550px;
-}
-
-.notes-sidebar {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-md);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.notes-sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--border-subtle);
-  background: rgba(15, 23, 42, 0.5);
-}
-
-.notes-sidebar-header h3 {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.btn-icon-sm {
-  width: 28px;
-  height: 28px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
-.btn-icon-sm:hover {
-  color: var(--mint);
-  border-color: var(--mint);
-}
-
-.notes-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0.5rem;
-}
-
-.note-item {
-  padding: 0.65rem 0.85rem;
-  border-radius: var(--radius-sm);
-  margin-bottom: 0.35rem;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  border: 1px solid transparent;
-}
-
-.note-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.note-item.active {
-  background: #1e293b;
-  border-color: var(--border-card);
-}
-
-.note-item-title {
-  font-size: 0.825rem;
-  font-weight: 600;
-  color: var(--text-main);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 0.2rem;
-}
-
-.note-item-date {
-  font-size: 0.7rem;
-  color: var(--text-sub);
-}
-
-/* Notes Editor Main Pane */
-.notes-editor-pane {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-md);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.note-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--border-subtle);
-  background: rgba(15, 23, 42, 0.5);
-  gap: 1rem;
-}
-
-.note-info-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-}
-
-.note-title-field {
-  background: transparent;
-  border: none;
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 700;
-  width: 100%;
-  outline: none;
-}
-
-.note-status-badge {
-  font-size: 0.7rem;
-  color: var(--mint);
-  white-space: nowrap;
-}
-
-.note-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-}
-
-.note-mode-toggle {
-  display: flex;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 2px;
-}
-
-.mode-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-sub);
-  padding: 0.35rem 0.65rem;
-  font-size: 0.8rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.mode-btn.active {
-  background: #1e293b;
-  color: var(--text-main);
-}
-
-.note-panels-container {
-  flex: 1;
-  display: grid;
-  overflow: hidden;
-}
-
-.note-panels-container.split-view {
-  grid-template-columns: 1fr 1fr;
-}
-
-.note-panels-container.edit-only {
-  grid-template-columns: 1fr;
-}
-.note-panels-container.edit-only .note-preview-panel {
-  display: none;
-}
-
-.note-panels-container.preview-only {
-  grid-template-columns: 1fr;
-}
-.note-panels-container.preview-only .note-edit-panel {
-  display: none;
-}
-
-.note-edit-panel {
-  border-right: 1px solid var(--border-subtle);
-  display: flex;
-  flex-direction: column;
-}
-
-.markdown-textarea {
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  border: none;
-  color: #e2e8f0;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  line-height: 1.7;
-  padding: 1.25rem;
-  resize: none;
-  outline: none;
-}
-
-.note-preview-panel {
-  overflow-y: auto;
-  padding: 1.25rem 1.5rem;
-  background: #0b1120;
-}
-
-.markdown-rendered-body {
-  color: var(--text-main);
-  line-height: 1.75;
-}
-
-.markdown-rendered-body h1, 
-.markdown-rendered-body h2, 
-.markdown-rendered-body h3 {
-  color: var(--text-main);
-  margin-top: 1.2rem;
-  margin-bottom: 0.6rem;
-  font-weight: 800;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 0.3rem;
-}
-
-.markdown-rendered-body code {
-  font-family: var(--font-mono);
-  background: rgba(0, 0, 0, 0.4);
-  color: var(--sky);
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-}
-
-.markdown-rendered-body pre {
-  background: #111726;
-  border: 1px solid var(--border-subtle);
-  padding: 1rem;
-  border-radius: var(--radius-sm);
-  overflow-x: auto;
-  margin: 1rem 0;
-}
-
-/* ==========================================================================
-   Tab 3: Exam Bank (Ngân Hàng Đề Thi)
-   ========================================================================== */
-
-.exams-container {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-}
-
-.exam-header-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.exam-header-title h2 {
-  font-size: 1.25rem;
-  font-weight: 800;
-  margin-bottom: 0.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.exam-header-title p {
-  font-size: 0.825rem;
-  color: var(--text-muted);
-}
-
-.exam-filter-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.search-input-pill {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 300px;
-}
-
-.search-input-pill i {
-  position: absolute;
-  left: 0.85rem;
-  color: var(--text-sub);
-  font-size: 0.8rem;
-}
-
-.search-input-pill input {
-  width: 100%;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 0.8rem;
-  padding: 0.45rem 1rem 0.45rem 2.2rem;
-  border-radius: var(--radius-full);
-  outline: none;
-}
-
-.count-badge {
-  font-size: 0.775rem;
-  font-weight: 700;
-  color: var(--mint);
-  background: rgba(45, 212, 191, 0.12);
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
-}
-
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-input);
-}
-
-.modern-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 0.825rem;
-}
-
-.modern-table th {
-  background: #111726;
-  color: var(--text-muted);
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.725rem;
-  letter-spacing: 0.4px;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.modern-table td {
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  color: var(--text-body);
-  vertical-align: middle;
-}
-
-.modern-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.tag-badge {
-  display: inline-block;
-  font-size: 0.725rem;
-  font-weight: 600;
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-full);
-}
-
-.diff-easy { background: rgba(16, 185, 129, 0.15); color: var(--emerald); }
-.diff-med { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
-.diff-hard { background: rgba(244, 63, 94, 0.15); color: var(--rose); }
-
-.status-done { color: var(--emerald); font-weight: 600; }
-.status-review { color: var(--rose); font-weight: 600; }
-.status-todo { color: var(--text-muted); }
-
-.empty-exam-state {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  color: var(--text-muted);
-}
-
-.empty-exam-state i {
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-  color: var(--text-sub);
 }
 
 /* ==========================================================================
@@ -1501,12 +955,6 @@ body {
   color: var(--text-sub);
 }
 
-.form-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
 .feedback-box {
   padding: 0.6rem 0.85rem;
   border-radius: var(--radius-sm);
@@ -1540,9 +988,19 @@ body {
   gap: 0.4rem;
 }
 
-.text-mint { color: var(--mint) !important; }
-.text-sky { color: var(--sky) !important; }
-.text-danger { color: var(--rose) !important; }
+.code-editor-textarea {
+  width: 100%;
+  height: 500px;
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  padding: 1rem;
+  resize: none;
+  outline: none;
+}
 
 /* Toast Notifications */
 .toast-hub {
@@ -1579,9 +1037,5 @@ body {
   .header-inner {
     flex-direction: column;
     align-items: stretch;
-  }
-  .notes-workspace {
-    grid-template-columns: 1fr;
-    height: auto;
   }
 }

@@ -1,6 +1,6 @@
 /**
- * EduVault - Main Academic Controller
- * Orchestrates Study Drive, Markdown Notes, Exam Bank, Global Search, and GitHub Synchronization.
+ * EduVault - Main Single-Hub Academic Drive Controller
+ * Infinite nested folder navigation, file uploads, viewer, and GitHub synchronization.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,36 +11,35 @@ document.addEventListener('DOMContentLoaded', () => {
   let config = storage.getConfig();
   let currentPath = '';
   let currentItems = [];
-  let currentSubjectFilter = 'all';
-  let currentCategoryFilter = 'all';
   let currentEditingFile = null;
-  let examRecords = [];
-  let examFileSha = null;
-  let viewMode = 'grid'; // 'grid' | 'list'
 
-  // Notes State
-  let currentNoteFile = null;
+  // System source files to automatically hide from root view
+  const SYSTEM_SOURCE_FILES = [
+    'index.html',
+    'styles.css',
+    'readme.md',
+    'js',
+    'data',
+    '.gitkeep',
+    '.gitignore',
+    'cname',
+    'license',
+    'package.json'
+  ];
 
-  // DOM - Header & Navigation
-  const moduleTabs = document.querySelectorAll('.module-tab');
-  const tabContents = document.querySelectorAll('.tab-content');
+  // DOM Elements
   const globalSearchInput = document.getElementById('global-search-input');
   const headerRepoText = document.getElementById('header-repo-text');
   const btnRefresh = document.getElementById('btn-refresh');
   const btnOpenSettings = document.getElementById('btn-open-settings');
-  const subjectPills = document.querySelectorAll('.subject-pill');
-  const btnAddSubjectPill = document.getElementById('btn-add-subject-pill');
 
-  // DOM - Tab 1: Study Drive
   const bcRoot = document.getElementById('bc-root');
   const bcTrail = document.getElementById('bc-trail');
-  const fileCategoryFilter = document.getElementById('file-category-filter');
   const btnViewGrid = document.getElementById('btn-view-grid');
   const btnViewList = document.getElementById('btn-view-list');
   const btnNewStudyFolder = document.getElementById('btn-new-study-folder');
   const btnTriggerUpload = document.getElementById('btn-trigger-upload');
   const btnBrowseClick = document.getElementById('btn-browse-click');
-  const btnEmptyUploadAction = document.getElementById('btn-empty-upload-action');
   const hiddenFileInput = document.getElementById('hidden-file-input');
   const studyDropzone = document.getElementById('study-dropzone');
   const uploadProgressBox = document.getElementById('upload-progress-box');
@@ -50,29 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const studyFileGrid = document.getElementById('study-file-grid');
   const studyEmpty = document.getElementById('study-empty');
   const studyLoading = document.getElementById('study-loading');
+  const btnEmptyCreateFolder = document.getElementById('btn-empty-create-folder');
+  const btnEmptyUploadAction = document.getElementById('btn-empty-upload-action');
 
-  // DOM - Tab 2: Notes
-  const notesListContainer = document.getElementById('notes-list-container');
-  const btnCreateNote = document.getElementById('btn-create-note');
-  const noteTitleInput = document.getElementById('note-title-input');
-  const noteSaveStatus = document.getElementById('note-save-status');
-  const btnNoteSplit = document.getElementById('btn-note-split');
-  const btnNoteEditOnly = document.getElementById('btn-note-edit-only');
-  const btnNotePreviewOnly = document.getElementById('btn-note-preview-only');
-  const notePanelsContainer = document.getElementById('note-panels-container');
-  const noteMarkdownTextarea = document.getElementById('note-markdown-textarea');
-  const markdownRenderedBody = document.getElementById('markdown-rendered-body');
-  const btnSaveNoteGithub = document.getElementById('btn-save-note-github');
-
-  // DOM - Tab 3: Exam Bank
-  const btnOpenAddExamModal = document.getElementById('btn-open-add-exam-modal');
-  const btnExportExamData = document.getElementById('btn-export-exam-data');
-  const examSearchInput = document.getElementById('exam-search-input');
-  const examStatusSummary = document.getElementById('exam-status-summary');
-  const examsTableBody = document.getElementById('exams-table-body');
-  const emptyExamState = document.getElementById('empty-exam-state');
-
-  // DOM - Modals
+  // Modals
   const modalSettings = document.getElementById('modal-settings');
   const btnCloseSettings = document.getElementById('btn-close-settings');
   const cfgOwner = document.getElementById('cfg-owner');
@@ -100,23 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelFolder = document.getElementById('btn-cancel-folder');
   const inputNewFolderName = document.getElementById('input-new-folder-name');
   const btnConfirmFolder = document.getElementById('btn-confirm-folder');
-
-  const modalExam = document.getElementById('modal-exam');
-  const btnCloseExam = document.getElementById('btn-close-exam');
-  const btnCancelExam = document.getElementById('btn-cancel-exam');
-  const examEditId = document.getElementById('exam-edit-id');
-  const examInTitle = document.getElementById('exam-in-title');
-  const examInSubject = document.getElementById('exam-in-subject');
-  const examInTerm = document.getElementById('exam-in-term');
-  const examInDifficulty = document.getElementById('exam-in-difficulty');
-  const examInStatus = document.getElementById('exam-in-status');
-  const examInLink = document.getElementById('exam-in-link');
-  const btnSaveExam = document.getElementById('btn-save-exam');
+  const folderCreateLabel = document.getElementById('folder-create-label');
 
   const toastHub = document.getElementById('toast-hub');
 
   // ==========================================================================
-  // Toast Helper
+  // Toast Notification Helper
   // ==========================================================================
   function showToast(message, type = 'info', duration = 3000) {
     const toast = document.createElement('div');
@@ -137,65 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================================================
-  // Global Shortcut: Ctrl + K Search
-  // ==========================================================================
-  window.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault();
-      globalSearchInput.focus();
-    }
-  });
-
-  // ==========================================================================
-  // Module Tab Switching
-  // ==========================================================================
-  moduleTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      moduleTabs.forEach(t => t.classList.remove('active'));
-      tabContents.forEach(c => c.classList.remove('active'));
-
-      tab.classList.add('active');
-      const target = document.getElementById(tab.dataset.tab);
-      if (target) target.classList.add('active');
-
-      if (tab.dataset.tab === 'tab-study-notes') loadNotesList();
-      if (tab.dataset.tab === 'tab-exam-bank') loadExamsData();
-    });
-  });
-
-  // ==========================================================================
-  // Subject Pills Filtering
-  // ==========================================================================
-  subjectPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('.subject-pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      currentSubjectFilter = pill.dataset.subject;
-      applyFilters();
-    });
-  });
-
-  btnAddSubjectPill.addEventListener('click', () => {
-    const name = prompt('Nhập tên môn học mới (Ví dụ: HoaHoc, LichSu, TrietHoc):');
-    if (name) {
-      const cleanName = name.replace(/\s+/g, '');
-      const btn = document.createElement('button');
-      btn.className = 'subject-pill';
-      btn.dataset.subject = cleanName;
-      btn.textContent = `📖 ${name}`;
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.subject-pill').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        currentSubjectFilter = cleanName;
-        applyFilters();
-      });
-      document.getElementById('subject-pills-bar').insertBefore(btn, btnAddSubjectPill);
-      btn.click();
-    }
-  });
-
-  // ==========================================================================
-  // TAB 1: Study Drive (Kho Tài Liệu Môn Học)
+  // Directory & File Loading (Recursive Tree)
   // ==========================================================================
   async function loadDirectory(path = '') {
     currentPath = path;
@@ -218,48 +129,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Danh sách các tệp mã nguồn của hệ thống website cần ẩn để không làm rối mắt
-  const SYSTEM_SOURCE_FILES = [
-    'index.html',
-    'styles.css',
-    'readme.md',
-    'js',
-    '.gitkeep',
-    '.gitignore',
-    'cname',
-    'license',
-    'package.json'
-  ];
-
   function applyFilters() {
     let filtered = [...currentItems];
 
-    // Tự động ẩn các tệp mã nguồn website khi ở thư mục gốc (Gốc)
+    // Auto-hide system files at root directory
     if (!currentPath) {
       filtered = filtered.filter(item => !SYSTEM_SOURCE_FILES.includes(item.name.toLowerCase()));
+    } else {
+      // In sub-folders, only hide .gitkeep
+      filtered = filtered.filter(item => item.name !== '.gitkeep');
     }
 
-    // Global Search filter
+    // Search query filter
     const query = globalSearchInput.value.toLowerCase().trim();
     if (query) {
       filtered = filtered.filter(item => item.name.toLowerCase().includes(query));
-    }
-
-    // Subject Pill filter
-    if (currentSubjectFilter !== 'all') {
-      filtered = filtered.filter(item => 
-        item.name.toLowerCase().includes(currentSubjectFilter.toLowerCase()) || 
-        item.path.toLowerCase().includes(currentSubjectFilter.toLowerCase())
-      );
-    }
-
-    // Category filter
-    if (currentCategoryFilter !== 'all') {
-      filtered = filtered.filter(item => {
-        if (item.type === 'dir') return true;
-        const info = storage.classifyStudyFile(item.name);
-        return info.category === currentCategoryFilter;
-      });
     }
 
     renderStudyFiles(filtered);
@@ -275,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     studyEmpty.style.display = 'none';
 
-    // Sort folders first
+    // Sort folders first, then files alphabetically
     const sorted = [...items].sort((a, b) => {
       if (a.type === b.type) return a.name.localeCompare(b.name);
       return a.type === 'dir' ? -1 : 1;
@@ -288,15 +172,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (item.type === 'dir') {
         card.innerHTML = `
           <div class="card-top">
-            <div class="card-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--amber);">
+            <div class="card-icon-box" style="background: rgba(251, 191, 36, 0.15); color: var(--amber);">
               <i class="fa-solid fa-folder"></i>
             </div>
-            <span class="badge-study-type type-folder">Thư mục môn</span>
+            <span class="badge-study-type type-folder">Thư mục</span>
           </div>
           <div class="card-filename" title="${item.name}">${item.name}</div>
           <div class="card-meta-row">
-            <span>Danh mục học tập</span>
-            <i class="fa-solid fa-arrow-right"></i>
+            <span>Bấm để mở thư mục</span>
+            <i class="fa-solid fa-chevron-right"></i>
           </div>
         `;
         card.addEventListener('click', () => loadDirectory(item.path));
@@ -339,7 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Breadcrumbs
+  // ==========================================================================
+  // Breadcrumb Navigation (Gốc > Cấp 1 > Cấp 2...)
+  // ==========================================================================
   function updateBreadcrumbs() {
     bcTrail.innerHTML = '';
     if (!currentPath) {
@@ -350,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const parts = currentPath.split('/').filter(Boolean);
     let accum = '';
+
     parts.forEach((p, idx) => {
       accum += (idx === 0 ? '' : '/') + p;
       const target = accum;
@@ -361,22 +248,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const btn = document.createElement('button');
       btn.className = `bc-item ${idx === parts.length - 1 ? 'active' : ''}`;
-      btn.textContent = p;
+      btn.innerHTML = `<i class="fa-regular fa-folder-open text-amber"></i> <span>${p}</span>`;
       btn.addEventListener('click', () => loadDirectory(target));
       bcTrail.appendChild(btn);
     });
   }
 
   bcRoot.addEventListener('click', () => loadDirectory(''));
-
-  // Filter Listeners
   globalSearchInput.addEventListener('input', applyFilters);
-  fileCategoryFilter.addEventListener('change', (e) => {
-    currentCategoryFilter = e.target.value;
-    applyFilters();
-  });
 
-  // View switch
+  // View switch (Grid / List)
   btnViewGrid.addEventListener('click', () => {
     btnViewGrid.classList.add('active');
     btnViewList.classList.remove('active');
@@ -389,7 +270,9 @@ document.addEventListener('DOMContentLoaded', () => {
     studyFileGrid.classList.add('list-view');
   });
 
-  // Drag & Drop Upload
+  // ==========================================================================
+  // Drag & Drop / File Uploading in Current Directory
+  // ==========================================================================
   ['dragenter', 'dragover'].forEach(eName => {
     studyDropzone.addEventListener(eName, (e) => {
       e.preventDefault();
@@ -471,414 +354,53 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDirectory(currentPath);
   }
 
-  // Create Subject Folder
-  btnNewStudyFolder.addEventListener('click', () => {
+  // ==========================================================================
+  // Create Folder (Nested in Current Directory)
+  // ==========================================================================
+  function openFolderModal() {
     if (!config.token) {
-      showToast('Cần có GitHub Token để tạo thư mục môn học.', 'error');
+      showToast('Cần có GitHub Token để tạo thư mục.', 'error');
       modalSettings.style.display = 'flex';
       return;
     }
     inputNewFolderName.value = '';
+    const currentLoc = currentPath ? `trong thư mục '${currentPath}'` : 'tại Thư mục gốc';
+    folderCreateLabel.innerHTML = `Tên thư mục mới (${currentLoc}):`;
     modalFolder.style.display = 'flex';
     inputNewFolderName.focus();
-  });
+  }
 
+  btnNewStudyFolder.addEventListener('click', openFolderModal);
+  btnEmptyCreateFolder.addEventListener('click', openFolderModal);
   btnCloseFolder.addEventListener('click', () => modalFolder.style.display = 'none');
   btnCancelFolder.addEventListener('click', () => modalFolder.style.display = 'none');
 
   btnConfirmFolder.addEventListener('click', async () => {
     const fName = inputNewFolderName.value.trim().replace(/[\\/:*?"<>|]/g, '');
     if (!fName) {
-      showToast('Vui lòng nhập tên thư mục môn học hợp lệ.', 'error');
+      showToast('Vui lòng nhập tên thư mục hợp lệ.', 'error');
       return;
     }
 
-    const folderPath = currentPath ? `${currentPath}/${fName}/.gitkeep` : `${fName}/.gitkeep`;
+    const folderPlaceholder = currentPath ? `${currentPath}/${fName}/.gitkeep` : `${fName}/.gitkeep`;
     try {
       modalFolder.style.display = 'none';
-      showToast('Đang tạo thư mục môn học trên GitHub...', 'info');
+      showToast('Đang tạo thư mục trên GitHub...', 'info');
       await api.uploadFile(
         config.owner,
         config.repo,
-        folderPath,
+        folderPlaceholder,
         storage.utf8ToBase64('# EduVault Folder Placeholder'),
         `EduVault: Tạo thư mục ${fName}`,
         null,
         config.branch,
         config.token
       );
-      showToast(`Đã tạo thư mục môn '${fName}'!`, 'success');
+      showToast(`Đã tạo thư mục '${fName}' thành công!`, 'success');
       loadDirectory(currentPath);
     } catch (err) {
       showToast(`Lỗi tạo thư mục: ${err.message}`, 'error');
     }
-  });
-
-  // Quick subject folder creators from empty state
-  document.querySelectorAll('.btn-quick-add-folder').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (!config.token) {
-        showToast('Cần có GitHub Token để tạo thư mục môn học.', 'error');
-        modalSettings.style.display = 'flex';
-        return;
-      }
-      inputNewFolderName.value = btn.getAttribute('data-name');
-      modalFolder.style.display = 'flex';
-      inputNewFolderName.focus();
-    });
-  });
-
-  // ==========================================================================
-  // TAB 2: Markdown Study Notes (Sổ Tay Ghi Chú)
-  // ==========================================================================
-  async function loadNotesList() {
-    notesListContainer.innerHTML = '<div style="padding:1rem; text-align:center; font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải ghi chú...</div>';
-
-    try {
-      // Check for notes in root or 'notes' directory
-      let notes = await api.getContents(config.owner, config.repo, 'notes', config.branch, config.token).catch(() => []);
-      if (notes.length === 0) {
-        const rootItems = await api.getContents(config.owner, config.repo, '', config.branch, config.token);
-        notes = rootItems.filter(it => it.name.endsWith('.md') && it.name !== 'README.md');
-      }
-
-      renderNotesList(notes);
-    } catch (e) {
-      notesListContainer.innerHTML = '<div style="padding:1rem; text-align:center; font-size:0.75rem; color:var(--rose);">Chưa có ghi chú nào.</div>';
-    }
-  }
-
-  function renderNotesList(notes) {
-    notesListContainer.innerHTML = '';
-    if (!notes || notes.length === 0) {
-      notesListContainer.innerHTML = '<div style="padding:1rem; text-align:center; font-size:0.75rem; color:var(--text-muted);">Chưa có ghi chú. Bấm nút (+) để tạo ghi chú mới.</div>';
-      return;
-    }
-
-    notes.forEach((item, idx) => {
-      const div = document.createElement('div');
-      div.className = `note-item ${idx === 0 ? 'active' : ''}`;
-      div.innerHTML = `
-        <div class="note-item-title"><i class="fa-regular fa-file-lines text-mint"></i> ${item.name}</div>
-        <div class="note-item-date">Tài liệu Markdown</div>
-      `;
-      div.addEventListener('click', () => {
-        document.querySelectorAll('.note-item').forEach(n => n.classList.remove('active'));
-        div.classList.add('active');
-        openNote(item);
-      });
-      notesListContainer.appendChild(div);
-    });
-
-    if (notes.length > 0) openNote(notes[0]);
-  }
-
-  async function openNote(item) {
-    currentNoteFile = item;
-    noteTitleInput.value = item.name;
-    noteSaveStatus.textContent = 'Đang tải...';
-
-    try {
-      const fileData = await api.getFileDetails(config.owner, config.repo, item.path, config.branch, config.token);
-      currentNoteFile.sha = fileData.sha;
-      const content = storage.base64ToUtf8(fileData.content || '');
-      noteMarkdownTextarea.value = content;
-      renderMarkdownPreview(content);
-      noteSaveStatus.textContent = 'Đã đồng bộ';
-    } catch (e) {
-      noteSaveStatus.textContent = 'Lỗi đọc file';
-    }
-  }
-
-  function renderMarkdownPreview(rawMd) {
-    if (typeof marked !== 'undefined') {
-      markdownRenderedBody.innerHTML = marked.parse(rawMd);
-      if (window.hljs) {
-        markdownRenderedBody.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
-      }
-    }
-  }
-
-  noteMarkdownTextarea.addEventListener('input', () => {
-    noteSaveStatus.textContent = 'Chưa lưu thay đổi';
-    renderMarkdownPreview(noteMarkdownTextarea.value);
-  });
-
-  btnCreateNote.addEventListener('click', () => {
-    const title = prompt('Nhập tên bài ghi chú (Ví dụ: GiaiTich_Chuong1.md):', 'GhiChuMoi.md');
-    if (title) {
-      const safeTitle = title.endsWith('.md') ? title : `${title}.md`;
-      currentNoteFile = { name: safeTitle, path: `notes/${safeTitle}`, sha: null };
-      noteTitleInput.value = safeTitle;
-      noteMarkdownTextarea.value = `# ${safeTitle.replace('.md', '')}\n\n- Ghi chú lý thuyết tại đây...\n`;
-      renderMarkdownPreview(noteMarkdownTextarea.value);
-      noteSaveStatus.textContent = 'Ghi chú mới (Chưa lưu)';
-    }
-  });
-
-  btnSaveNoteGithub.addEventListener('click', async () => {
-    if (!config.token) {
-      showToast('Cần có GitHub Token để lưu ghi chú.', 'error');
-      modalSettings.style.display = 'flex';
-      return;
-    }
-
-    const title = noteTitleInput.value.trim();
-    if (!title) {
-      showToast('Vui lòng nhập tên tiêu đề ghi chú.', 'error');
-      return;
-    }
-
-    const filePath = currentNoteFile && currentNoteFile.path ? currentNoteFile.path : `notes/${title}`;
-    const content = noteMarkdownTextarea.value;
-
-    try {
-      showToast('Đang lưu ghi chú vào GitHub...', 'info');
-      const res = await api.uploadFile(
-        config.owner,
-        config.repo,
-        filePath,
-        storage.utf8ToBase64(content),
-        `EduVault: Lưu ghi chú ${title}`,
-        currentNoteFile ? currentNoteFile.sha : null,
-        config.branch,
-        config.token
-      );
-      if (currentNoteFile) currentNoteFile.sha = res.content.sha;
-      noteSaveStatus.textContent = 'Đã lưu lên GitHub';
-      showToast(`Đã lưu ghi chú '${title}' thành công!`, 'success');
-      loadNotesList();
-    } catch (e) {
-      showToast(`Lỗi lưu ghi chú: ${e.message}`, 'error');
-    }
-  });
-
-  // Note View Mode Buttons
-  btnNoteSplit.addEventListener('click', () => {
-    btnNoteSplit.classList.add('active');
-    btnNoteEditOnly.classList.remove('active');
-    btnNotePreviewOnly.classList.remove('active');
-    notePanelsContainer.className = 'note-panels-container split-view';
-  });
-
-  btnNoteEditOnly.addEventListener('click', () => {
-    btnNoteEditOnly.classList.add('active');
-    btnNoteSplit.classList.remove('active');
-    btnNotePreviewOnly.classList.remove('active');
-    notePanelsContainer.className = 'note-panels-container edit-only';
-  });
-
-  btnNotePreviewOnly.addEventListener('click', () => {
-    btnNotePreviewOnly.classList.add('active');
-    btnNoteSplit.classList.remove('active');
-    btnNoteEditOnly.classList.remove('active');
-    notePanelsContainer.className = 'note-panels-container preview-only';
-  });
-
-  // ==========================================================================
-  // TAB 3: Exam Bank (Ngân Hàng Đề Thi)
-  // ==========================================================================
-  async function loadExamsData() {
-    examsTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải ngân hàng đề thi...</td></tr>';
-    emptyExamState.style.display = 'none';
-
-    try {
-      const fileData = await api.getFileDetails(config.owner, config.repo, storage.EXAM_DATA_PATH, config.branch, config.token);
-      examFileSha = fileData.sha;
-      const str = storage.base64ToUtf8(fileData.content || '[]');
-      examRecords = storage.safeJsonParse(str, []);
-      renderExamsTable(examRecords);
-    } catch (e) {
-      examRecords = [];
-      examFileSha = null;
-      renderExamsTable([]);
-    }
-  }
-
-  function renderExamsTable(records) {
-    examsTableBody.innerHTML = '';
-    examStatusSummary.innerHTML = `<span class="count-badge total">${records.length} Đề thi</span>`;
-
-    if (!records || records.length === 0) {
-      emptyExamState.style.display = 'block';
-      return;
-    }
-
-    emptyExamState.style.display = 'none';
-
-    records.forEach((rec, idx) => {
-      const tr = document.createElement('tr');
-      let diffClass = 'diff-easy';
-      if (rec.difficulty === 'Trung bình') diffClass = 'diff-med';
-      if (rec.difficulty === 'Khó') diffClass = 'diff-hard';
-
-      let statusClass = 'status-todo';
-      if (rec.status === 'Đã hoàn thành') statusClass = 'status-done';
-      if (rec.status === 'Cần ôn lại') statusClass = 'status-review';
-
-      tr.innerHTML = `
-        <td><strong>${rec.title || 'Chưa đặt tên'}</strong></td>
-        <td><span class="tag-badge" style="background:#1e293b; color:var(--mint);">${rec.subject || 'Đại cương'}</span></td>
-        <td>${rec.term || 'HK1'}</td>
-        <td><span class="tag-badge ${diffClass}">${rec.difficulty || 'Trung bình'}</span></td>
-        <td><span class="${statusClass}">${rec.status || 'Chưa làm'}</span></td>
-        <td>${rec.link ? `<a href="${rec.link}" target="_blank" class="text-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Mở đề thi</a>` : '—'}</td>
-        <td>
-          <div style="display:flex; gap:0.4rem;">
-            <button class="btn-subtle-sm btn-edit-exam" data-id="${rec.id}"><i class="fa-regular fa-pen-to-square"></i></button>
-            <button class="btn-danger-sm btn-del-exam" data-id="${rec.id}"><i class="fa-regular fa-trash-can"></i></button>
-          </div>
-        </td>
-      `;
-
-      tr.querySelector('.btn-edit-exam').addEventListener('click', () => openExamModal(rec));
-      tr.querySelector('.btn-del-exam').addEventListener('click', () => deleteExam(rec.id));
-
-      examsTableBody.appendChild(tr);
-    });
-  }
-
-  // Filter exam table
-  examSearchInput.addEventListener('input', (e) => {
-    const q = e.target.value.toLowerCase().trim();
-    if (!q) return renderExamsTable(examRecords);
-    const filtered = examRecords.filter(r => 
-      (r.title && r.title.toLowerCase().includes(q)) ||
-      (r.subject && r.subject.toLowerCase().includes(q))
-    );
-    renderExamsTable(filtered);
-  });
-
-  function openExamModal(record = null) {
-    if (record) {
-      examEditId.value = record.id;
-      examInTitle.value = record.title || '';
-      examInSubject.value = record.subject || '';
-      examInTerm.value = record.term || '';
-      examInDifficulty.value = record.difficulty || 'Trung bình';
-      examInStatus.value = record.status || 'Chưa làm';
-      examInLink.value = record.link || '';
-    } else {
-      examEditId.value = '';
-      examInTitle.value = '';
-      examInSubject.value = '';
-      examInTerm.value = '';
-      examInDifficulty.value = 'Trung bình';
-      examInStatus.value = 'Chưa làm';
-      examInLink.value = '';
-    }
-    modalExam.style.display = 'flex';
-    examInTitle.focus();
-  }
-
-  btnOpenAddExamModal.addEventListener('click', () => {
-    if (!config.token) {
-      showToast('Cần có GitHub Token để thêm đề thi.', 'error');
-      modalSettings.style.display = 'flex';
-      return;
-    }
-    openExamModal(null);
-  });
-
-  btnCloseExam.addEventListener('click', () => modalExam.style.display = 'none');
-  btnCancelExam.addEventListener('click', () => modalExam.style.display = 'none');
-
-  btnSaveExam.addEventListener('click', async () => {
-    const title = examInTitle.value.trim();
-    const subject = examInSubject.value.trim();
-    if (!title || !subject) {
-      showToast('Vui lòng nhập tên đề thi và môn học.', 'error');
-      return;
-    }
-
-    const editId = examEditId.value;
-    let updated = [...examRecords];
-
-    if (editId) {
-      updated = updated.map(r => r.id === editId ? {
-        ...r,
-        title,
-        subject,
-        term: examInTerm.value.trim(),
-        difficulty: examInDifficulty.value,
-        status: examInStatus.value,
-        link: examInLink.value.trim()
-      } : r);
-    } else {
-      updated.unshift({
-        id: 'exam_' + Date.now().toString(36),
-        title,
-        subject,
-        term: examInTerm.value.trim(),
-        difficulty: examInDifficulty.value,
-        status: examInStatus.value,
-        link: examInLink.value.trim(),
-        createdAt: new Date().toISOString()
-      });
-    }
-
-    try {
-      modalExam.style.display = 'none';
-      showToast('Đang lưu đề thi vào GitHub...', 'info');
-      const jsonStr = JSON.stringify(updated, null, 2);
-      const res = await api.uploadFile(
-        config.owner,
-        config.repo,
-        storage.EXAM_DATA_PATH,
-        storage.utf8ToBase64(jsonStr),
-        `EduVault: Cập nhật ngân hàng đề thi`,
-        examFileSha,
-        config.branch,
-        config.token
-      );
-      examFileSha = res.content.sha;
-      examRecords = updated;
-      renderExamsTable(examRecords);
-      showToast('Đã lưu đề thi thành công!', 'success');
-    } catch (e) {
-      showToast(`Lỗi lưu đề thi: ${e.message}`, 'error');
-    }
-  });
-
-  async function deleteExam(id) {
-    if (!config.token) {
-      showToast('Cần có GitHub Token để xóa.', 'error');
-      return;
-    }
-    if (!confirm('Bạn có chắc chắn muốn xóa đề thi này?')) return;
-
-    const updated = examRecords.filter(r => r.id !== id);
-    try {
-      showToast('Đang xóa đề thi...', 'info');
-      const res = await api.uploadFile(
-        config.owner,
-        config.repo,
-        storage.EXAM_DATA_PATH,
-        storage.utf8ToBase64(JSON.stringify(updated, null, 2)),
-        `EduVault: Xóa đề thi ${id}`,
-        examFileSha,
-        config.branch,
-        config.token
-      );
-      examFileSha = res.content.sha;
-      examRecords = updated;
-      renderExamsTable(examRecords);
-      showToast('Đã xóa đề thi!', 'success');
-    } catch (e) {
-      showToast(`Lỗi: ${e.message}`, 'error');
-    }
-  }
-
-  // Export Exam Data
-  btnExportExamData.addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(examRecords, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `eduvault_de_thi_${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Đã xuất file dữ liệu đề thi!', 'success');
   });
 
   // ==========================================================================
@@ -942,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const decoded = storage.base64ToUtf8(fileData.content || '');
         currentEditingFile = { name: item.name, path: item.path, sha: fileData.sha };
         viewerBodyContent.innerHTML = `
-          <textarea id="viewer-code-editor" class="markdown-textarea" style="height:500px;" spellcheck="false">${decoded}</textarea>
+          <textarea id="viewer-code-editor" class="code-editor-textarea" spellcheck="false">${decoded}</textarea>
         `;
         viewerFoot.style.display = 'flex';
       } else {
@@ -950,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="study-empty">
             <div class="empty-icon-box"><i class="${info.icon}"></i></div>
             <h3>Tệp định dạng ${item.name.split('.').pop().toUpperCase()}</h3>
-            <p>Định dạng này phù hợp tải xuống trực tiếp hoặc mở bằng ứng dụng trên máy.</p>
+            <p>Định dạng này phù hợp tải xuống trực tiếp hoặc mở bằng ứng dụng trên máy tính.</p>
           </div>
         `;
       }
@@ -1048,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
     storage.saveConfig(config);
     modalSettings.style.display = 'none';
 
-    headerRepoText.textContent = `${config.owner}/${config.repo}`;
+    headerRepoText.textContent = config.repo;
     loadDirectory('');
     showToast('Đã lưu cấu hình và kết nối thành công!', 'success');
   });
@@ -1059,6 +581,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Initial Load
-  headerRepoText.textContent = `${config.owner}/${config.repo}`;
+  headerRepoText.textContent = config.repo;
   loadDirectory('');
 });

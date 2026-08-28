@@ -3,34 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduVault - Không Gian Lưu Trữ & Quản Lý Dữ Liệu Học Tập</title>
-  <meta name="description" content="Nền tảng lưu trữ giáo trình, slide bài giảng, đề thi, ghi chú và tài liệu học tập trực tuyến chuẩn quốc tế trên GitHub.">
+  <title>EduVault - Quản Lý & Lưu Trữ Dữ Liệu Học Tập</title>
+  <meta name="description" content="Nền tảng quản lý thư mục và lưu trữ tài liệu học tập trực tuyến chuẩn quốc tế trên GitHub.">
   
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- Highlight.js for Code Highlighting -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  
-  <!-- Marked.js for Markdown Notes Rendering -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <!-- Application Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="dark-theme">
-  <!-- Subtle Ambient Glows -->
+  <!-- Ambient Glow Backdrops -->
   <div class="ambient-glow glow-top"></div>
   <div class="ambient-glow glow-bottom"></div>
 
-  <!-- Top App Navigation -->
+  <!-- Header Bar -->
   <header class="app-header">
     <div class="header-inner">
-      <!-- Logo & Brand -->
+      <!-- Brand -->
       <div class="brand">
         <div class="brand-icon">
           <i class="fa-solid fa-graduation-cap"></i>
@@ -38,22 +31,21 @@
         <div class="brand-text">
           <div class="brand-title">
             <span>EduVault</span>
-            <span class="version-tag">Study Hub</span>
+            <span class="version-tag">Study Drive</span>
           </div>
-          <span class="brand-sub">Kho Dữ Liệu Học Tập & Nghiên Cứu</span>
+          <span class="brand-sub">Hệ Thống Quản Lý Thư Mục & Lưu Trữ Học Tập</span>
         </div>
       </div>
 
-      <!-- Center Search & Filter -->
+      <!-- Search in current view -->
       <div class="header-search-wrapper">
         <div class="header-search">
           <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="global-search-input" placeholder="Tìm kiếm giáo trình, slide, đề thi, ghi chú... (Ctrl + K)">
-          <span class="search-shortcut">⌘K</span>
+          <input type="text" id="global-search-input" placeholder="Tìm kiếm nhanh tài liệu hoặc thư mục...">
         </div>
       </div>
 
-      <!-- Right Unified Compact Action Cluster -->
+      <!-- Right Action Cluster -->
       <div class="header-actions">
         <div class="unified-cluster" id="header-cluster-box">
           <button class="cluster-main-btn" id="btn-open-settings" title="Cấu hình Kho Dữ Liệu & Token">
@@ -70,273 +62,98 @@
     </div>
   </header>
 
-  <!-- Secondary Bar: Navigation Modules & Quick Subject Pills -->
-  <div class="sub-header">
-    <div class="sub-header-inner">
-      <!-- Main Module Navigation -->
-      <nav class="module-nav">
-        <button class="module-tab active" data-tab="tab-study-drive">
-          <i class="fa-solid fa-folder-open"></i>
-          <span>Kho Tài Liệu Môn Học</span>
+  <!-- Main Unified Workspace (Single Tab Hub) -->
+  <main class="workspace-container">
+    <!-- Toolbar -->
+    <div class="workspace-toolbar">
+      <!-- Breadcrumb path navigation -->
+      <div class="breadcrumbs" id="study-breadcrumbs">
+        <button class="bc-item root active" id="bc-root" title="Về thư mục gốc">
+          <i class="fa-solid fa-house"></i>
+          <span>Gốc</span>
         </button>
-        <button class="module-tab" data-tab="tab-study-notes">
-          <i class="fa-solid fa-book-bookmark"></i>
-          <span>Sổ Tay Ghi Chú (Notes)</span>
-        </button>
-        <button class="module-tab" data-tab="tab-exam-bank">
-          <i class="fa-solid fa-bullseye"></i>
-          <span>Ngân Hàng Đề Thi</span>
-        </button>
-      </nav>
+        <div class="bc-trail" id="bc-trail"></div>
+      </div>
 
-      <!-- Quick Subject Filter Pills -->
-      <div class="subject-pills-bar" id="subject-pills-bar">
-        <span class="filter-label"><i class="fa-solid fa-filter"></i> Môn:</span>
-        <button class="subject-pill active" data-subject="all">Tất cả môn học</button>
-        <button class="subject-pill" data-subject="LapTrinh">💻 Lập Trình</button>
-        <button class="subject-pill" data-subject="Toan">📐 Toán Học</button>
-        <button class="subject-pill" data-subject="TiengAnh">🌐 Tiếng Anh</button>
-        <button class="subject-pill" data-subject="KhoaHoc">🔬 Khoa Học</button>
-        <button class="subject-pill" data-subject="DaiCuong">📚 Đại Cương</button>
-        <button class="subject-pill-add" id="btn-add-subject-pill" title="Thêm danh mục môn mới">
-          <i class="fa-solid fa-plus"></i>
+      <!-- Action Tools -->
+      <div class="toolbar-tools">
+        <!-- View Mode Switch -->
+        <div class="view-switch">
+          <button class="v-btn active" id="btn-view-grid" title="Dạng lưới thẻ"><i class="fa-solid fa-grip"></i></button>
+          <button class="v-btn" id="btn-view-list" title="Dạng danh sách"><i class="fa-solid fa-list"></i></button>
+        </div>
+
+        <!-- Create Folder in Current Directory -->
+        <button class="btn-subtle" id="btn-new-study-folder">
+          <i class="fa-solid fa-folder-plus text-amber"></i>
+          <span>+ Tạo Thư Mục Mới</span>
         </button>
+
+        <!-- Upload Files in Current Directory -->
+        <button class="btn-primary-action" id="btn-trigger-upload">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Tải Lên Tài Liệu</span>
+        </button>
+        <input type="file" id="hidden-file-input" multiple style="display: none;">
       </div>
     </div>
-  </div>
 
-  <!-- Main Workspace -->
-  <main class="workspace-container">
-
-    <!-- ==================== TAB 1: KHO TÀI LIỆU MÔN HỌC (STUDY DRIVE) ==================== -->
-    <section class="tab-content active" id="tab-study-drive">
-      <!-- Toolbar -->
-      <div class="workspace-toolbar">
-        <!-- Breadcrumb navigation -->
-        <div class="breadcrumbs" id="study-breadcrumbs">
-          <button class="bc-item root active" id="bc-root">
-            <i class="fa-solid fa-house-laptop"></i>
-            <span>Gốc (Root)</span>
-          </button>
-          <div class="bc-trail" id="bc-trail"></div>
+    <!-- Drag & Drop Upload Zone -->
+    <div class="study-dropzone" id="study-dropzone">
+      <div class="dropzone-core">
+        <div class="dropzone-icon-box">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
         </div>
-
-        <!-- Toolbar Right Controls -->
-        <div class="toolbar-tools">
-          <!-- File Category Filter -->
-          <div class="category-select-wrapper">
-            <select id="file-category-filter" class="clean-select">
-              <option value="all">📁 Tất cả thể loại</option>
-              <option value="document">📄 Giáo trình / PDF</option>
-              <option value="slide">📊 Slide Bài Giảng</option>
-              <option value="code">💻 Code / Bài Tập</option>
-              <option value="image">🗺️ Mindmap & Hình ảnh</option>
-              <option value="video">🎬 Video / Audio</option>
-              <option value="notes">📝 Ghi chú (.md)</option>
-            </select>
-          </div>
-
-          <!-- View Switcher -->
-          <div class="view-switch">
-            <button class="v-btn active" id="btn-view-grid" title="Dạng lưới thẻ"><i class="fa-solid fa-grip-vertical"></i></button>
-            <button class="v-btn" id="btn-view-list" title="Dạng danh sách chi tiết"><i class="fa-solid fa-list-ul"></i></button>
-          </div>
-
-          <!-- Action Buttons -->
-          <button class="btn-subtle" id="btn-new-study-folder">
-            <i class="fa-solid fa-folder-plus"></i>
-            <span>Tạo Thư mục Môn</span>
-          </button>
-
-          <button class="btn-primary-action" id="btn-trigger-upload">
-            <i class="fa-solid fa-arrow-up-from-bracket"></i>
-            <span>Tải Lên Tài Liệu</span>
-          </button>
-          <input type="file" id="hidden-file-input" multiple style="display: none;">
+        <div class="dropzone-text">
+          <h4>Kéo & Thả tài liệu học tập vào thư mục này</h4>
+          <p>Hỗ trợ Giáo trình PDF, Slide PPTX, Đề thi, Video bài giảng, Mindmap, Mã nguồn và lưu trữ trực tiếp vào kho GitHub</p>
         </div>
+        <button class="btn-browse" id="btn-browse-click">
+          <i class="fa-regular fa-folder-open"></i> Chọn tệp từ máy
+        </button>
       </div>
 
-      <!-- Compact Smart Upload Dropzone -->
-      <div class="study-dropzone" id="study-dropzone">
-        <div class="dropzone-core">
-          <div class="dropzone-icon-box">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-          </div>
-          <div class="dropzone-text">
-            <h4>Kéo & Thả Giáo Trình, Slide, Đề Thi hoặc Code vào đây</h4>
-            <p>Hỗ trợ tải lên PDF, PPTX, DOCX, ZIP, MP4, PNG, MD và lưu trữ trực tiếp vào kho GitHub <code>DataHocTap</code></p>
-          </div>
-          <button class="btn-browse" id="btn-browse-click">
-            <i class="fa-regular fa-folder-open"></i> Chọn tệp từ máy
-          </button>
+      <!-- Upload Progress Indicator -->
+      <div class="upload-progress-box" id="upload-progress-box" style="display: none;">
+        <div class="up-info">
+          <span id="up-filename">Đang tải lên tài liệu...</span>
+          <span id="up-percentage">0%</span>
         </div>
-
-        <!-- Upload Progress Indicator -->
-        <div class="upload-progress-box" id="upload-progress-box" style="display: none;">
-          <div class="up-info">
-            <span id="up-filename">Đang tải lên tài liệu...</span>
-            <span id="up-percentage">0%</span>
-          </div>
-          <div class="up-track">
-            <div class="up-fill" id="up-fill" style="width: 0%;"></div>
-          </div>
+        <div class="up-track">
+          <div class="up-fill" id="up-fill" style="width: 0%;"></div>
         </div>
       </div>
+    </div>
 
-      <!-- File Grid / List Explorer -->
-      <div class="files-container">
-        <!-- Dynamic Files List -->
-        <div class="study-file-grid" id="study-file-grid"></div>
+    <!-- File & Folder Explorer -->
+    <div class="files-container">
+      <div class="study-file-grid" id="study-file-grid">
+        <!-- Dynamic folders and files -->
+      </div>
 
-        <!-- Loading State -->
-        <div class="study-loading" id="study-loading" style="display: none;">
-          <div class="loading-ring"></div>
-          <p>Đang đồng bộ dữ liệu học tập với GitHub Repository...</p>
+      <!-- Loading State -->
+      <div class="study-loading" id="study-loading" style="display: none;">
+        <div class="loading-ring"></div>
+        <p>Đang đồng bộ dữ liệu với GitHub Repository...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="study-empty" id="study-empty" style="display: none;">
+        <div class="empty-icon-box">
+          <i class="fa-regular fa-folder-open"></i>
         </div>
-
-        <!-- Empty State (Clean Study Workspace) -->
-        <div class="study-empty" id="study-empty" style="display: none;">
-          <div class="empty-icon-box">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <h3>Không gian lưu trữ học tập sẵn sàng!</h3>
-          <p>Các tệp mã nguồn website đã được ẩn tự động. Bạn có thể kéo thả tài liệu vào đây hoặc tạo các thư mục môn học để bắt đầu sắp xếp:</p>
-          <div class="quick-subject-creator" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.25rem;">
-            <button class="btn-subtle-sm btn-quick-add-folder" data-name="LapTrinh">💻 + Thư mục Lập Trình</button>
-            <button class="btn-subtle-sm btn-quick-add-folder" data-name="ToanCaoCap">📐 + Thư mục Toán Học</button>
-            <button class="btn-subtle-sm btn-quick-add-folder" data-name="TiengAnh">🌐 + Thư mục Tiếng Anh</button>
-            <button class="btn-subtle-sm btn-quick-add-folder" data-name="GiaoTrinh_PDF">📄 + Thư mục Giáo Trình</button>
-          </div>
+        <h3>Thư mục này hiện đang trống</h3>
+        <p>Bạn có thể tạo thêm các thư mục con bên trong để phân loại hoặc kéo thả tải tài liệu học tập vào đây.</p>
+        <div class="empty-actions" style="display: flex; gap: 0.75rem; justify-content: center;">
+          <button class="btn-subtle" id="btn-empty-create-folder">
+            <i class="fa-solid fa-folder-plus text-amber"></i> Tạo Thư Mục Con
+          </button>
           <button class="btn-primary-action" id="btn-empty-upload-action">
-            <i class="fa-solid fa-cloud-arrow-up"></i> Tải Tài Liệu Học Tập Lên
+            <i class="fa-solid fa-cloud-arrow-up"></i> Tải Tài Liệu Vào Đây
           </button>
         </div>
       </div>
-    </section>
-
-    <!-- ==================== TAB 2: SỔ TAY GHI CHÚ (MARKDOWN NOTES) ==================== -->
-    <section class="tab-content" id="tab-study-notes">
-      <div class="notes-workspace">
-        <!-- Notes Sidebar: List of Markdown notes -->
-        <div class="notes-sidebar">
-          <div class="notes-sidebar-header">
-            <h3><i class="fa-solid fa-bookmark text-mint"></i> Danh Sách Ghi Chú</h3>
-            <button class="btn-icon-sm" id="btn-create-note" title="Tạo ghi chú mới">
-              <i class="fa-solid fa-plus"></i>
-            </button>
-          </div>
-          <div class="notes-list" id="notes-list-container">
-            <!-- Dynamic note items -->
-          </div>
-        </div>
-
-        <!-- Notes Main Editor / Viewer -->
-        <div class="notes-editor-pane">
-          <div class="note-toolbar">
-            <div class="note-info-bar">
-              <input type="text" id="note-title-input" class="note-title-field" placeholder="Tiêu đề bài ghi chú (Ví dụ: Toan_GiaiTich_Chuong1.md)">
-              <span class="note-status-badge" id="note-save-status">Đã đồng bộ</span>
-            </div>
-            <div class="note-actions">
-              <div class="note-mode-toggle">
-                <button class="mode-btn active" id="btn-note-split" title="Chia đôi màn hình"><i class="fa-solid fa-table-columns"></i></button>
-                <button class="mode-btn" id="btn-note-edit-only" title="Chỉ soạn thảo"><i class="fa-solid fa-pen-to-square"></i></button>
-                <button class="mode-btn" id="btn-note-preview-only" title="Chỉ xem trước"><i class="fa-regular fa-eye"></i></button>
-              </div>
-              <button class="btn-primary-action" id="btn-save-note-github">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-                <span>Lưu Lên GitHub</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="note-panels-container split-view" id="note-panels-container">
-            <!-- Raw Markdown Editor -->
-            <div class="note-edit-panel">
-              <textarea id="note-markdown-textarea" class="markdown-textarea" placeholder="Nhập ghi chú bằng Markdown tại đây...
-# Ví dụ Chương 1: Giới thiệu
-- Khái niệm cơ bản
-- Công thức trọng tâm: E = mc^2
-```python
-# Code mẫu bài tập
-def tinh_diem(a, b):
-    return (a + b) / 2
-```"></textarea>
-            </div>
-
-            <!-- Live Rendered Preview -->
-            <div class="note-preview-panel" id="note-rendered-preview">
-              <div class="markdown-rendered-body" id="markdown-rendered-body">
-                <!-- Live HTML from marked.js -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 3: NGÂN HÀNG ĐỀ THI & BÀI TẬP ==================== -->
-    <section class="tab-content" id="tab-exam-bank">
-      <div class="exams-container">
-        <!-- Exam Bank Header -->
-        <div class="exam-header-bar">
-          <div class="exam-header-title">
-            <h2><i class="fa-solid fa-bullseye text-mint"></i> Ngân Hàng Đề Thi & Bài Tập Ôn Luyện</h2>
-            <p>Quản lý và lưu trữ đề kiểm tra, đề thi giữa kỳ, cuối kỳ kèm đáp án chi tiết cho từng môn học.</p>
-          </div>
-          <div class="exam-header-tools">
-            <button class="btn-primary-action" id="btn-open-add-exam-modal">
-              <i class="fa-solid fa-plus"></i>
-              <span>Thêm Đề Thi Mới</span>
-            </button>
-            <button class="btn-subtle" id="btn-export-exam-data">
-              <i class="fa-solid fa-file-export"></i>
-              <span>Xuất Dữ Liệu</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Filter & Search Exam -->
-        <div class="exam-filter-row">
-          <div class="search-input-pill">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="exam-search-input" placeholder="Lọc đề thi theo tên hoặc môn học...">
-          </div>
-          <div class="exam-status-counts" id="exam-status-summary">
-            <span class="count-badge total">0 Đề thi</span>
-          </div>
-        </div>
-
-        <!-- Exam Table -->
-        <div class="exam-table-card">
-          <div class="table-responsive">
-            <table class="modern-table" id="exams-table">
-              <thead>
-                <tr>
-                  <th>Tên Đề Thi / Bài Kiểm Tra</th>
-                  <th>Môn Học</th>
-                  <th>Học Kỳ / Năm</th>
-                  <th>Mức Độ</th>
-                  <th>Trạng Thái Ôn Luyện</th>
-                  <th>File Đề & Đáp Án</th>
-                  <th>Hành Động</th>
-                </tr>
-              </thead>
-              <tbody id="exams-table-body">
-                <!-- Populated dynamically from data/exams.json -->
-              </tbody>
-            </table>
-          </div>
-
-          <div class="empty-exam-state" id="empty-exam-state" style="display: none;">
-            <i class="fa-solid fa-clipboard-question"></i>
-            <h4>Chưa có đề thi nào trong ngân hàng</h4>
-            <p>Bấm nút "Thêm Đề Thi Mới" để lưu đề ôn tập đầu tiên vào kho GitHub của bạn.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
+    </div>
   </main>
 
   <!-- ==================== MODALS ==================== -->
@@ -410,76 +227,22 @@ def tinh_diem(a, b):
     </div>
   </div>
 
-  <!-- Modal 3: Create Folder / Subject -->
+  <!-- Modal 3: Create Folder -->
   <div class="modal-backdrop" id="modal-folder" style="display: none;">
     <div class="modal-window">
       <div class="modal-head">
-        <h3><i class="fa-solid fa-folder-plus text-mint"></i> Tạo Thư Mục Môn Học Mới</h3>
+        <h3><i class="fa-solid fa-folder-plus text-amber"></i> Tạo Thư Mục Mới</h3>
         <button class="modal-close" id="btn-close-folder"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-content">
         <div class="form-item">
-          <label>Tên thư mục môn học (Ví dụ: <code>LapTrinhWeb</code>, <code>GiaiTich_1</code>, <code>TiengAnh_B2</code>)</label>
+          <label id="folder-create-label">Tên thư mục mới (Ví dụ: <code>ToanCaoCap</code>, <code>GiaoTrinh</code>, <code>DeThi2025</code>):</label>
           <input type="text" id="input-new-folder-name" class="clean-input" placeholder="Nhập tên thư mục...">
         </div>
       </div>
       <div class="modal-foot">
         <button class="btn-subtle" id="btn-cancel-folder">Hủy</button>
         <button class="btn-primary-action" id="btn-confirm-folder">Tạo Thư Mục</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 4: Add Exam / Assignment -->
-  <div class="modal-backdrop" id="modal-exam" style="display: none;">
-    <div class="modal-window">
-      <div class="modal-head">
-        <h3><i class="fa-solid fa-bullseye text-mint"></i> Thêm Đề Thi / Bài Tập Ôn Luyện</h3>
-        <button class="modal-close" id="btn-close-exam"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal-content">
-        <form id="form-exam" onsubmit="return false;">
-          <input type="hidden" id="exam-edit-id">
-          <div class="form-item">
-            <label>Tên đề thi / Bài kiểm tra <span class="text-danger">*</span></label>
-            <input type="text" id="exam-in-title" class="clean-input" placeholder="Ví dụ: Đề thi giữa kỳ Giải tích 1 - Năm 2025" required>
-          </div>
-          <div class="form-item">
-            <label>Môn học <span class="text-danger">*</span></label>
-            <input type="text" id="exam-in-subject" class="clean-input" placeholder="Ví dụ: Toán Cao Cấp, Lập Trình C++, Tiếng Anh..." required>
-          </div>
-          <div class="form-grid-2">
-            <div class="form-item">
-              <label>Học kỳ / Năm</label>
-              <input type="text" id="exam-in-term" class="clean-input" placeholder="HK1 2025-2026">
-            </div>
-            <div class="form-item">
-              <label>Mức độ khó</label>
-              <select id="exam-in-difficulty" class="clean-select">
-                <option value="Dễ">🟢 Dễ (Cơ bản)</option>
-                <option value="Trung bình" selected>🟡 Trung bình</option>
-                <option value="Khó">🔴 Khó (Nâng cao)</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-item">
-            <label>Trạng thái ôn tập</label>
-            <select id="exam-in-status" class="clean-select">
-              <option value="Chưa làm">⚪ Chưa làm</option>
-              <option value="Đang ôn">🟡 Đang ôn luyện</option>
-              <option value="Cần ôn lại">🔴 Cần ôn lại kỹ</option>
-              <option value="Đã hoàn thành">🟢 Đã hoàn thành (100%)</option>
-            </select>
-          </div>
-          <div class="form-item">
-            <label>Đường dẫn tệp đề thi / Đáp án (Trong kho hoặc link ngoài)</label>
-            <input type="text" id="exam-in-link" class="clean-input" placeholder="Ví dụ: Toan/DeThi2025.pdf hoặc link Google Drive...">
-          </div>
-        </form>
-      </div>
-      <div class="modal-foot">
-        <button class="btn-subtle" id="btn-cancel-exam">Hủy</button>
-        <button class="btn-primary-action" id="btn-save-exam">Lưu Đề Thi</button>
       </div>
     </div>
   </div>
