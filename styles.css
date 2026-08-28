@@ -10,9 +10,8 @@
   --bg-card: rgba(18, 26, 43, 0.75);
   --bg-card-hover: rgba(30, 41, 65, 0.85);
   --bg-input: #0b1120;
-  --bg-toolbar: rgba(15, 23, 42, 0.8);
 
-  /* Academic Color Palette (Clean, Focused, Contrast) */
+  /* Academic Color Palette */
   --mint: #2dd4bf;
   --mint-hover: #14b8a6;
   --mint-glow: rgba(45, 212, 191, 0.25);
@@ -117,7 +116,7 @@ body {
 }
 
 /* ==========================================================================
-   Header & Sub-Header
+   Header & Navigation
    ========================================================================== */
 
 .app-header {
@@ -191,7 +190,7 @@ body {
 /* Center Search */
 .header-search-wrapper {
   flex: 1;
-  max-width: 500px;
+  max-width: 480px;
 }
 
 .header-search {
@@ -237,7 +236,12 @@ body {
   border-radius: 4px;
 }
 
-/* Unified Compact Action Cluster */
+/* Unified Action Cluster */
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
 .unified-cluster {
   display: flex;
   align-items: center;
@@ -323,7 +327,7 @@ body {
 }
 
 /* ==========================================================================
-   Sub-Header (Modules & Subject Filter Pills)
+   Sub-Header (Module Navigation & Subject Filter Pills)
    ========================================================================== */
 
 .sub-header {
@@ -438,7 +442,7 @@ body {
 }
 
 /* ==========================================================================
-   Workspace Layout
+   Workspace Layout & Tabs
    ========================================================================== */
 
 .workspace-container {
@@ -451,11 +455,11 @@ body {
 
 .tab-content {
   display: none;
-  animation: fadeIn 0.25s ease;
 }
 
 .tab-content.active {
   display: block;
+  animation: fadeIn 0.25s ease;
 }
 
 @keyframes fadeIn {
@@ -626,6 +630,11 @@ body {
   gap: 0.3rem;
   cursor: pointer;
   text-decoration: none;
+}
+
+.btn-subtle-sm:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--mint);
 }
 
 .btn-danger-sm {
@@ -925,7 +934,7 @@ body {
 .study-empty p {
   font-size: 0.85rem;
   color: var(--text-muted);
-  max-width: 450px;
+  max-width: 480px;
   margin-bottom: 1.25rem;
 }
 
@@ -1338,152 +1347,6 @@ body {
   font-size: 2.5rem;
   margin-bottom: 0.75rem;
   color: var(--text-sub);
-}
-
-/* ==========================================================================
-   Tab 4: CDN & Fast Sharing
-   ========================================================================== */
-
-.cdn-share-container {
-  max-width: 860px;
-  margin: 0 auto;
-}
-
-.cdn-hero {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.cdn-hero h2 {
-  font-size: 1.35rem;
-  font-weight: 800;
-  margin-bottom: 0.35rem;
-}
-
-.cdn-hero p {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.cdn-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-}
-
-.cdn-input-group {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.4rem;
-}
-
-.cdn-links-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.cdn-link-box {
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-}
-
-.cdn-box-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.cdn-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.cdn-badge.cdn-fast {
-  color: var(--mint);
-}
-
-.cdn-link-field {
-  width: 100%;
-  background: #111726;
-  border: 1px solid var(--border-subtle);
-  color: var(--sky);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius-xs);
-  outline: none;
-}
-
-.btn-copy-action {
-  background: #1e293b;
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.6rem;
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-}
-
-.btn-copy-action:hover {
-  background: var(--mint);
-  color: #080c14;
-}
-
-/* ==========================================================================
-   Tab 5: Guide Content
-   ========================================================================== */
-
-.guide-container h2 {
-  font-size: 1.3rem;
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.guide-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.25rem;
-}
-
-.g-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
-  position: relative;
-}
-
-.g-num {
-  position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: rgba(45, 212, 191, 0.2);
-}
-
-.g-card h3 {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: var(--text-main);
-}
-
-.g-card p {
-  font-size: 0.825rem;
-  color: var(--text-muted);
-  line-height: 1.6;
 }
 
 /* ==========================================================================
