@@ -1,6 +1,6 @@
 /**
- * GitVault - GitHub REST API v3 Integration Module
- * Handles all CRUD operations, authentication, file uploading, rate-limiting, and CDN resolutions.
+ * EduVault - GitHub REST API v3 Integration Module
+ * Handles all academic repository communications, CRUD commits, and CDN URLs.
  */
 
 class GitHubAPI {
@@ -8,9 +8,6 @@ class GitHubAPI {
     this.baseUrl = 'https://api.github.com';
   }
 
-  /**
-   * Generates authorization & standard headers for GitHub API requests
-   */
   getHeaders(token) {
     const headers = {
       'Accept': 'application/vnd.github.v3+json',
@@ -22,117 +19,66 @@ class GitHubAPI {
     return headers;
   }
 
-  /**
-   * Check rate limits & token validity
-   */
-  async checkRateLimit(token) {
-    try {
-      const response = await fetch(`${this.baseUrl}/rate_limit`, {
-        headers: this.getHeaders(token)
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Lỗi khi kiểm tra Rate Limit:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Validate repository existence & permissions
-   */
   async getRepoDetails(owner, repo, token) {
     try {
-      const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}`, {
+      const res = await fetch(`${this.baseUrl}/repos/${owner}/${repo}`, {
         headers: this.getHeaders(token)
       });
-
-      if (response.status === 404) {
-        throw new Error('Repository không tồn tại hoặc ở chế độ Private (cần có Token hợp lệ để truy cập).');
-      }
-      if (response.status === 401) {
-        throw new Error('Token không hợp lệ hoặc đã hết hạn.');
-      }
-      if (!response.ok) {
-        throw new Error(`Lỗi kết nối GitHub (${response.status}): ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Lỗi khi lấy thông tin Repo:', error);
-      throw error;
+      if (res.status === 404) throw new Error('Kho lưu trữ không tồn tại hoặc ở chế độ Private.');
+      if (res.status === 401) throw new Error('Token không hợp lệ hoặc đã hết hạn.');
+      if (!res.ok) throw new Error(`Lỗi kết nối GitHub (${res.status})`);
+      return await res.json();
+    } catch (e) {
+      console.error('Lỗi lấy thông tin repo:', e);
+      throw e;
     }
   }
 
-  /**
-   * List contents of a directory (files and folders)
-   */
   async getContents(owner, repo, path = '', branch = 'main', token = '') {
     try {
       const cleanPath = path.replace(/^\/+|\/+$/g, '');
       const url = `${this.baseUrl}/repos/${owner}/${repo}/contents/${cleanPath}${branch ? `?ref=${encodeURIComponent(branch)}` : ''}`;
       
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         headers: this.getHeaders(token),
         cache: 'no-cache'
       });
 
-      if (response.status === 404) {
-        return []; // Directory might be empty or root has no items
-      }
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Lỗi lấy danh sách tệp (${response.status})`);
+      if (res.status === 404) return [];
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Lỗi tải danh mục (${res.status})`);
       }
 
-      const data = await response.json();
+      const data = await res.json();
       return Array.isArray(data) ? data : [data];
-    } catch (error) {
-      console.error(`Lỗi khi đọc thư mục '${path}':`, error);
-      throw error;
+    } catch (e) {
+      console.error(`Lỗi đọc thư mục '${path}':`, e);
+      throw e;
     }
   }
 
-  /**
-   * Get single file metadata & base64 content
-   */
   async getFileDetails(owner, repo, path, branch = 'main', token = '') {
     try {
       const cleanPath = path.replace(/^\/+|\/+$/g, '');
       const url = `${this.baseUrl}/repos/${owner}/${repo}/contents/${cleanPath}${branch ? `?ref=${encodeURIComponent(branch)}` : ''}`;
       
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         headers: this.getHeaders(token),
         cache: 'no-cache'
       });
 
-      if (!response.ok) {
-        throw new Error(`Không tìm thấy tệp hoặc lỗi truy cập (${response.status})`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error(`Lỗi khi lấy thông tin tệp '${path}':`, error);
-      throw error;
+      if (!res.ok) throw new Error(`Không thể đọc tệp (${res.status})`);
+      return await res.json();
+    } catch (e) {
+      console.error(`Lỗi lấy tệp '${path}':`, e);
+      throw e;
     }
   }
 
-  /**
-   * Upload (Create or Update) a file in the repository
-   * @param {string} owner - Repo owner
-   * @param {string} repo - Repo name
-   * @param {string} path - Relative file path (e.g. "images/photo.jpg")
-   * @param {string} base64Content - Base64 encoded string
-   * @param {string} commitMessage - Commit message
-   * @param {string|null} sha - File SHA (required when updating existing file)
-   * @param {string} branch - Branch name
-   * @param {string} token - Personal Access Token with repo write permissions
-   */
   async uploadFile(owner, repo, path, base64Content, commitMessage = '', sha = null, branch = 'main', token = '') {
     if (!token) {
-      throw new Error('Bạn cần nhập GitHub Token (PAT) có quyền ghi (Contents: write) để tải lên hoặc chỉnh sửa tệp.');
+      throw new Error('Bạn cần nhập GitHub Token (PAT) trong phần Cấu Hình để tải lên tài liệu.');
     }
 
     try {
@@ -140,85 +86,70 @@ class GitHubAPI {
       const url = `${this.baseUrl}/repos/${owner}/${repo}/contents/${cleanPath}`;
 
       const payload = {
-        message: commitMessage || `GitVault: ${sha ? 'Cập nhật' : 'Tải lên'} ${cleanPath}`,
+        message: commitMessage || `EduVault: Lưu ${cleanPath}`,
         content: base64Content,
         branch: branch || 'main'
       };
+      if (sha) payload.sha = sha;
 
-      if (sha) {
-        payload.sha = sha;
-      }
-
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         method: 'PUT',
         headers: this.getHeaders(token),
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (response.status === 409) {
-          throw new Error('Xung đột phiên bản (Conflict SHA). Vui lòng làm mới trang và thử lại.');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('Token không đủ quyền ghi (cần quyền Contents: Read and Write).');
         }
-        if (response.status === 401 || response.status === 403) {
-          throw new Error('Token không có đủ quyền ghi vào repository này. Vui lòng kiểm tra quyền Contents (Read & Write).');
-        }
-        throw new Error(errorData.message || `Lỗi tải lên tệp (${response.status})`);
+        throw new Error(err.message || `Lỗi tải lên (${res.status})`);
       }
 
-      return await response.json();
-    } catch (error) {
-      console.error(`Lỗi upload tệp '${path}':`, error);
-      throw error;
+      return await res.json();
+    } catch (e) {
+      console.error(`Lỗi upload tệp '${path}':`, e);
+      throw e;
     }
   }
 
-  /**
-   * Delete a file in repository
-   */
   async deleteFile(owner, repo, path, sha, commitMessage = '', branch = 'main', token = '') {
-    if (!token) {
-      throw new Error('Bạn cần nhập GitHub Token (PAT) để xóa tệp.');
-    }
+    if (!token) throw new Error('Cần có GitHub Token để xóa tài liệu.');
 
     try {
       const cleanPath = path.replace(/^\/+|\/+$/g, '');
       const url = `${this.baseUrl}/repos/${owner}/${repo}/contents/${cleanPath}`;
 
       const payload = {
-        message: commitMessage || `GitVault: Xóa ${cleanPath}`,
+        message: commitMessage || `EduVault: Xóa ${cleanPath}`,
         sha: sha,
         branch: branch || 'main'
       };
 
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         method: 'DELETE',
         headers: this.getHeaders(token),
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Lỗi khi xóa tệp (${response.status})`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Lỗi xóa tệp (${res.status})`);
       }
 
-      return await response.json();
-    } catch (error) {
-      console.error(`Lỗi xóa tệp '${path}':`, error);
-      throw error;
+      return await res.json();
+    } catch (e) {
+      console.error(`Lỗi xóa tệp '${path}':`, e);
+      throw e;
     }
   }
 
-  /**
-   * Generate fast CDN and Public URLs for files in a public repo
-   */
   getPublicUrls(owner, repo, path, branch = 'main') {
     const cleanPath = path.replace(/^\/+|\/+$/g, '');
     return {
       jsdelivr: `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${cleanPath}`,
       raw: `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${cleanPath}`,
-      githubWeb: `https://github.com/${owner}/${repo}/blob/${branch}/${cleanPath}`,
-      statically: `https://cdn.statically.io/gh/${owner}/${repo}/${branch}/${cleanPath}`
+      githubWeb: `https://github.com/${owner}/${repo}/blob/${branch}/${cleanPath}`
     };
   }
 }

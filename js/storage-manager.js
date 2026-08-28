@@ -1,21 +1,23 @@
 /**
- * GitVault - Storage & State Manager
- * Handles local preferences, Base64 transformations, File Metadata Helpers, and JSON Database Engine.
+ * EduVault - Storage & Academic State Manager
+ * Pre-configured for AnNguyen-Script/DataHocTap repository.
+ * Handles Study categories, Base64 UTF-8 encoding, and local persistence.
  */
 
 class StorageManager {
   constructor() {
-    this.CONFIG_KEY = 'gitvault_config';
-    this.CACHE_KEY = 'gitvault_cached_data';
+    this.CONFIG_KEY = 'eduvault_study_config';
+    this.EXAM_DATA_PATH = 'data/exams.json';
+    this.NOTES_FOLDER = 'notes';
   }
 
   /**
-   * Load saved configuration from LocalStorage
+   * Get configuration with user's repository as default
    */
   getConfig() {
-    const defaultPublicConfig = {
-      owner: 'facebook',
-      repo: 'react',
+    const defaultStudyConfig = {
+      owner: 'AnNguyen-Script',
+      repo: 'DataHocTap',
       branch: 'main',
       token: ''
     };
@@ -23,16 +25,16 @@ class StorageManager {
     try {
       const stored = localStorage.getItem(this.CONFIG_KEY);
       if (stored) {
-        return { ...defaultPublicConfig, ...JSON.parse(stored) };
+        return { ...defaultStudyConfig, ...JSON.parse(stored) };
       }
     } catch (e) {
-      console.warn('Không thể đọc cấu hình từ localStorage:', e);
+      console.warn('Không thể đọc cấu hình EduVault:', e);
     }
-    return defaultPublicConfig;
+    return defaultStudyConfig;
   }
 
   /**
-   * Save configuration to LocalStorage
+   * Save configuration
    */
   saveConfig(config) {
     try {
@@ -43,65 +45,106 @@ class StorageManager {
   }
 
   /**
-   * Format bytes into human-readable string (KB, MB, GB)
+   * Format file size
    */
-  formatBytes(bytes, decimals = 2) {
+  formatBytes(bytes, decimals = 1) {
     if (!+bytes) return '0 B';
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
   }
 
   /**
-   * Resolve file icon & file type category based on extension
+   * Classify study files into academic categories
    */
-  getFileTypeInfo(filename) {
+  classifyStudyFile(filename) {
     const ext = filename.split('.').pop().toLowerCase();
-    
-    // Image formats
-    if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'ico', 'avif', 'bmp'].includes(ext)) {
-      return { type: 'image', icon: 'fa-regular fa-image', color: 'text-cyan', isPreviewable: true };
-    }
-    // Code & Markup
-    if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'scss', 'json', 'py', 'php', 'java', 'c', 'cpp', 'rs', 'go', 'sql', 'sh', 'yaml', 'yml'].includes(ext)) {
-      return { type: 'code', icon: 'fa-solid fa-code', color: 'text-indigo', isPreviewable: true };
-    }
-    // Markdown & Text
-    if (['md', 'markdown', 'txt', 'rtf', 'log', 'env'].includes(ext)) {
-      return { type: 'text', icon: 'fa-regular fa-file-lines', color: 'text-purple', isPreviewable: true };
-    }
-    // Documents
-    if (['pdf'].includes(ext)) {
-      return { type: 'pdf', icon: 'fa-regular fa-file-pdf', color: 'text-danger', isPreviewable: true };
-    }
-    // Video
-    if (['mp4', 'webm', 'ogg', 'mov'].includes(ext)) {
-      return { type: 'video', icon: 'fa-regular fa-file-video', color: 'text-purple', isPreviewable: true };
-    }
-    // Audio
-    if (['mp3', 'wav', 'ogg', 'aac', 'flac'].includes(ext)) {
-      return { type: 'audio', icon: 'fa-regular fa-file-audio', color: 'text-cyan', isPreviewable: true };
-    }
-    // Archives
-    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
-      return { type: 'archive', icon: 'fa-regular fa-file-zipper', color: 'text-warning', isPreviewable: false };
+
+    // Slides & Presentations
+    if (['ppt', 'pptx', 'key', 'odp'].includes(ext)) {
+      return {
+        category: 'slide',
+        label: 'Slide Bài Giảng',
+        icon: 'fa-solid fa-person-chalkboard',
+        cssClass: 'type-slide',
+        isPreviewable: false
+      };
     }
 
-    // Default generic file
-    return { type: 'generic', icon: 'fa-regular fa-file', color: 'text-muted', isPreviewable: false };
+    // Textbooks, PDFs & Docs
+    if (['pdf', 'epub', 'doc', 'docx', 'djvu', 'odt'].includes(ext)) {
+      return {
+        category: 'document',
+        label: 'Giáo Trình / PDF',
+        icon: 'fa-regular fa-file-pdf',
+        cssClass: 'type-pdf',
+        isPreviewable: ext === 'pdf'
+      };
+    }
+
+    // Code & Programming Homework
+    if (['cpp', 'c', 'h', 'hpp', 'py', 'java', 'js', 'ts', 'html', 'css', 'sql', 'sh', 'json', 'zip', 'rar', '7z'].includes(ext)) {
+      return {
+        category: 'code',
+        label: 'Code / Bài Tập',
+        icon: 'fa-solid fa-code',
+        cssClass: 'type-code',
+        isPreviewable: !['zip', 'rar', '7z'].includes(ext)
+      };
+    }
+
+    // Markdown Notes
+    if (['md', 'markdown', 'txt'].includes(ext)) {
+      return {
+        category: 'notes',
+        label: 'Ghi Chú',
+        icon: 'fa-regular fa-file-lines',
+        cssClass: 'type-notes',
+        isPreviewable: true
+      };
+    }
+
+    // Mindmaps & Diagram Images
+    if (['png', 'jpg', 'jpeg', 'svg', 'webp', 'gif', 'bmp'].includes(ext)) {
+      return {
+        category: 'image',
+        label: 'Mindmap / Ảnh',
+        icon: 'fa-regular fa-image',
+        cssClass: 'type-image',
+        isPreviewable: true
+      };
+    }
+
+    // Lecture Audio & Video
+    if (['mp4', 'webm', 'mp3', 'wav', 'm4a', 'ogg', 'mov'].includes(ext)) {
+      return {
+        category: 'video',
+        label: 'Video / Audio Học',
+        icon: 'fa-regular fa-file-video',
+        cssClass: 'type-slide',
+        isPreviewable: true
+      };
+    }
+
+    return {
+      category: 'other',
+      label: 'Tài Liệu Khác',
+      icon: 'fa-regular fa-file',
+      cssClass: 'type-code',
+      isPreviewable: false
+    };
   }
 
   /**
-   * Convert File object to Base64 String (for GitHub API upload)
+   * Convert File to Base64
    */
   fileToBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
-        // Strip the data URL prefix (e.g., "data:image/png;base64,")
         const base64 = reader.result.split(',')[1];
         resolve(base64);
       };
@@ -110,7 +153,7 @@ class StorageManager {
   }
 
   /**
-   * Convert UTF-8 string to Base64 (supporting Unicode characters)
+   * UTF-8 String to Base64 (Full Unicode support for Vietnamese)
    */
   utf8ToBase64(str) {
     const bytes = new TextEncoder().encode(str);
@@ -119,7 +162,7 @@ class StorageManager {
   }
 
   /**
-   * Decode Base64 string to UTF-8 (supporting Unicode characters)
+   * Base64 to UTF-8 String
    */
   base64ToUtf8(base64) {
     try {
@@ -128,19 +171,15 @@ class StorageManager {
       const bytes = Uint8Array.from(binString, (m) => m.charCodeAt(0));
       return new TextDecoder().decode(bytes);
     } catch (e) {
-      console.warn('UTF-8 decode failed, falling back to atob:', e);
+      console.warn('UTF-8 decode fallback:', e);
       return atob(base64);
     }
   }
 
-  /**
-   * Safe JSON parse with fallback
-   */
-  safeJsonParse(jsonString, fallback = []) {
+  safeJsonParse(str, fallback = []) {
     try {
-      return JSON.parse(jsonString);
+      return JSON.parse(str);
     } catch (e) {
-      console.warn('Lỗi parse JSON:', e);
       return fallback;
     }
   }

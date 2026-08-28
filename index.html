@@ -3,590 +3,491 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GitVault - Hệ Thống Lưu Trữ Dữ Liệu & Cloud Drive Trên GitHub</title>
-  <meta name="description" content="Nền tảng lưu trữ tệp tin, hình ảnh và cơ sở dữ liệu JSON/Markdown thời gian thực sử dụng GitHub Repository & REST API làm Backend.">
+  <title>EduVault - Không Gian Lưu Trữ & Quản Lý Dữ Liệu Học Tập</title>
+  <meta name="description" content="Nền tảng lưu trữ giáo trình, slide bài giảng, đề thi, ghi chú và tài liệu học tập trực tuyến chuẩn quốc tế trên GitHub.">
   
-  <!-- Google Fonts & Font Awesome Icons -->
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
-  <!-- Highlight.js for Code & Markdown Highlighting -->
+  <!-- Highlight.js for Code Highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   
-  <!-- Marked.js for Live Markdown Rendering -->
+  <!-- Marked.js for Markdown Notes Rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <!-- Application Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="dark-theme">
-  <!-- Background Glow Accents -->
-  <div class="bg-glow bg-glow-1"></div>
-  <div class="bg-glow bg-glow-2"></div>
-  <div class="bg-glow bg-glow-3"></div>
+  <!-- Subtle Ambient Glows -->
+  <div class="ambient-glow glow-top"></div>
+  <div class="ambient-glow glow-bottom"></div>
 
-  <!-- Header Bar -->
+  <!-- Top App Navigation -->
   <header class="app-header">
-    <div class="header-container">
-      <div class="brand-section">
-        <div class="brand-logo">
-          <i class="fa-brands fa-github-alt"></i>
-          <span class="pulse-dot"></span>
+    <div class="header-inner">
+      <!-- Logo & Brand -->
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
         </div>
-        <div class="brand-info">
-          <h1 class="brand-title">GitVault <span class="badge-tag">Cloud Storage & DB</span></h1>
-          <p class="brand-subtitle">Powered by GitHub Public/Private Repository</p>
+        <div class="brand-text">
+          <div class="brand-title">
+            <span>EduVault</span>
+            <span class="version-tag">Study Hub</span>
+          </div>
+          <span class="brand-sub">Kho Dữ Liệu Học Tập & Nghiên Cứu</span>
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="header-nav">
-        <button class="nav-tab active" data-tab="drive-tab" id="tab-btn-drive">
-          <i class="fa-solid fa-hard-drive"></i>
-          <span>Cloud Drive</span>
-        </button>
-        <button class="nav-tab" data-tab="database-tab" id="tab-btn-database">
-          <i class="fa-solid fa-database"></i>
-          <span>Data Vault (JSON DB)</span>
-        </button>
-        <button class="nav-tab" data-tab="cdn-tab" id="tab-btn-cdn">
-          <i class="fa-solid fa-bolt"></i>
-          <span>CDN Links</span>
-        </button>
-        <button class="nav-tab" data-tab="guide-tab" id="tab-btn-guide">
-          <i class="fa-solid fa-book-open"></i>
-          <span>Hướng dẫn</span>
-        </button>
-      </nav>
-
-      <!-- User & Settings Action -->
-      <div class="header-actions">
-        <div class="repo-badge" id="current-repo-badge" title="Repository hiện tại">
-          <span class="status-indicator online" id="status-indicator"></span>
-          <span class="repo-name-text" id="repo-badge-name">Chưa kết nối</span>
+      <!-- Center Search & Filter -->
+      <div class="header-search-wrapper">
+        <div class="header-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="global-search-input" placeholder="Tìm kiếm giáo trình, slide, đề thi, ghi chú... (Ctrl + K)">
+          <span class="search-shortcut">⌘K</span>
         </div>
+      </div>
 
-        <button class="btn-icon" id="btn-refresh" title="Làm mới dữ liệu">
-          <i class="fa-solid fa-rotate"></i>
-        </button>
-
-        <button class="btn-primary-glow" id="btn-open-settings">
-          <i class="fa-solid fa-gear"></i>
-          <span class="btn-text">Cấu hình Repo</span>
-        </button>
+      <!-- Right Unified Compact Action Cluster -->
+      <div class="header-actions">
+        <div class="unified-cluster" id="header-cluster-box">
+          <button class="cluster-main-btn" id="btn-open-settings" title="Cấu hình Kho Dữ Liệu & Token">
+            <span class="status-dot"></span>
+            <span class="repo-text" id="header-repo-text">DataHocTap</span>
+            <i class="fa-solid fa-gear cluster-gear-icon"></i>
+          </button>
+          <span class="cluster-divider"></span>
+          <button class="cluster-refresh-btn" id="btn-refresh" title="Làm mới dữ liệu">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="app-main">
-    <!-- Storage Summary Bar -->
-    <section class="stats-banner">
-      <div class="stat-card">
-        <div class="stat-icon icon-indigo"><i class="fa-solid fa-folder-tree"></i></div>
-        <div class="stat-details">
-          <span class="stat-label">Tổng số tệp / thư mục</span>
-          <h3 class="stat-value" id="stat-total-items">0 mục</h3>
+  <!-- Secondary Bar: Navigation Modules & Quick Subject Pills -->
+  <div class="sub-header">
+    <div class="sub-header-inner">
+      <!-- Main Module Navigation -->
+      <nav class="module-nav">
+        <button class="module-tab active" data-tab="tab-study-drive">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Kho Tài Liệu Môn Học</span>
+        </button>
+        <button class="module-tab" data-tab="tab-study-notes">
+          <i class="fa-solid fa-book-bookmark"></i>
+          <span>Sổ Tay Ghi Chú (Notes)</span>
+        </button>
+        <button class="module-tab" data-tab="tab-exam-bank">
+          <i class="fa-solid fa-bullseye"></i>
+          <span>Ngân Hàng Đề Thi</span>
+        </button>
+      </nav>
+
+      <!-- Quick Subject Filter Pills -->
+      <div class="subject-pills-bar" id="subject-pills-bar">
+        <span class="filter-label"><i class="fa-solid fa-filter"></i> Môn:</span>
+        <button class="subject-pill active" data-subject="all">Tất cả môn học</button>
+        <button class="subject-pill" data-subject="LapTrinh">💻 Lập Trình</button>
+        <button class="subject-pill" data-subject="Toan">📐 Toán Học</button>
+        <button class="subject-pill" data-subject="TiengAnh">🌐 Tiếng Anh</button>
+        <button class="subject-pill" data-subject="KhoaHoc">🔬 Khoa Học</button>
+        <button class="subject-pill" data-subject="DaiCuong">📚 Đại Cương</button>
+        <button class="subject-pill-add" id="btn-add-subject-pill" title="Thêm danh mục môn mới">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace -->
+  <main class="workspace-container">
+
+    <!-- ==================== TAB 1: KHO TÀI LIỆU MÔN HỌC (STUDY DRIVE) ==================== -->
+    <section class="tab-content active" id="tab-study-drive">
+      <!-- Toolbar -->
+      <div class="workspace-toolbar">
+        <!-- Breadcrumb navigation -->
+        <div class="breadcrumbs" id="study-breadcrumbs">
+          <button class="bc-item root active" id="bc-root">
+            <i class="fa-solid fa-house-laptop"></i>
+            <span>Gốc (Root)</span>
+          </button>
+          <div class="bc-trail" id="bc-trail"></div>
+        </div>
+
+        <!-- Toolbar Right Controls -->
+        <div class="toolbar-tools">
+          <!-- File Category Filter -->
+          <div class="category-select-wrapper">
+            <select id="file-category-filter" class="clean-select">
+              <option value="all">📁 Tất cả thể loại</option>
+              <option value="document">📄 Giáo trình / PDF</option>
+              <option value="slide">📊 Slide Bài Giảng</option>
+              <option value="code">💻 Code / Bài Tập</option>
+              <option value="image">🗺️ Mindmap & Hình ảnh</option>
+              <option value="video">🎬 Video / Audio</option>
+              <option value="notes">📝 Ghi chú (.md)</option>
+            </select>
+          </div>
+
+          <!-- View Switcher -->
+          <div class="view-switch">
+            <button class="v-btn active" id="btn-view-grid" title="Dạng lưới thẻ"><i class="fa-solid fa-grip-vertical"></i></button>
+            <button class="v-btn" id="btn-view-list" title="Dạng danh sách chi tiết"><i class="fa-solid fa-list-ul"></i></button>
+          </div>
+
+          <!-- Action Buttons -->
+          <button class="btn-subtle" id="btn-new-study-folder">
+            <i class="fa-solid fa-folder-plus"></i>
+            <span>Tạo Thư mục Môn</span>
+          </button>
+
+          <button class="btn-primary-action" id="btn-trigger-upload">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+            <span>Tải Lên Tài Liệu</span>
+          </button>
+          <input type="file" id="hidden-file-input" multiple style="display: none;">
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon icon-cyan"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-        <div class="stat-details">
-          <span class="stat-label">Chế độ kết nối</span>
-          <h3 class="stat-value" id="stat-auth-mode">Chế độ xem công khai (Read-Only)</h3>
+
+      <!-- Compact Smart Upload Dropzone -->
+      <div class="study-dropzone" id="study-dropzone">
+        <div class="dropzone-core">
+          <div class="dropzone-icon-box">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <div class="dropzone-text">
+            <h4>Kéo & Thả Giáo Trình, Slide, Đề Thi hoặc Code vào đây</h4>
+            <p>Hỗ trợ tải lên PDF, PPTX, DOCX, ZIP, MP4, PNG, MD và lưu trữ trực tiếp vào kho GitHub <code>DataHocTap</code></p>
+          </div>
+          <button class="btn-browse" id="btn-browse-click">
+            <i class="fa-regular fa-folder-open"></i> Chọn tệp từ máy
+          </button>
+        </div>
+
+        <!-- Upload Progress Indicator -->
+        <div class="upload-progress-box" id="upload-progress-box" style="display: none;">
+          <div class="up-info">
+            <span id="up-filename">Đang tải lên tài liệu...</span>
+            <span id="up-percentage">0%</span>
+          </div>
+          <div class="up-track">
+            <div class="up-fill" id="up-fill" style="width: 0%;"></div>
+          </div>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon icon-purple"><i class="fa-solid fa-code-branch"></i></div>
-        <div class="stat-details">
-          <span class="stat-label">Nhánh hoạt động (Branch)</span>
-          <h3 class="stat-value" id="stat-current-branch">main</h3>
+
+      <!-- File Grid / List Explorer -->
+      <div class="files-container">
+        <!-- Dynamic Files List -->
+        <div class="study-file-grid" id="study-file-grid"></div>
+
+        <!-- Loading State -->
+        <div class="study-loading" id="study-loading" style="display: none;">
+          <div class="loading-ring"></div>
+          <p>Đang đồng bộ dữ liệu học tập với GitHub Repository...</p>
         </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon icon-emerald"><i class="fa-solid fa-shield-halved"></i></div>
-        <div class="stat-details">
-          <span class="stat-label">Tốc độ & CDN</span>
-          <h3 class="stat-value text-success">jsDelivr Global CDN</h3>
+
+        <!-- Empty State (Clean Study Workspace) -->
+        <div class="study-empty" id="study-empty" style="display: none;">
+          <div class="empty-icon-box">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <h3>Không gian lưu trữ học tập sẵn sàng!</h3>
+          <p>Các tệp mã nguồn website đã được ẩn tự động. Bạn có thể kéo thả tài liệu vào đây hoặc tạo các thư mục môn học để bắt đầu sắp xếp:</p>
+          <div class="quick-subject-creator" style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.25rem;">
+            <button class="btn-subtle-sm btn-quick-add-folder" data-name="LapTrinh">💻 + Thư mục Lập Trình</button>
+            <button class="btn-subtle-sm btn-quick-add-folder" data-name="ToanCaoCap">📐 + Thư mục Toán Học</button>
+            <button class="btn-subtle-sm btn-quick-add-folder" data-name="TiengAnh">🌐 + Thư mục Tiếng Anh</button>
+            <button class="btn-subtle-sm btn-quick-add-folder" data-name="GiaoTrinh_PDF">📄 + Thư mục Giáo Trình</button>
+          </div>
+          <button class="btn-primary-action" id="btn-empty-upload-action">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Tải Tài Liệu Học Tập Lên
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- ==================== TAB 1: CLOUD DRIVE ==================== -->
-    <section class="tab-pane active" id="drive-tab">
-      <div class="pane-layout">
-        <!-- Explorer Controls -->
-        <div class="toolbar">
-          <div class="breadcrumbs-container">
-            <button class="breadcrumb-item breadcrumb-root" id="breadcrumb-root">
-              <i class="fa-solid fa-house"></i>
-              <span>root</span>
+    <!-- ==================== TAB 2: SỔ TAY GHI CHÚ (MARKDOWN NOTES) ==================== -->
+    <section class="tab-content" id="tab-study-notes">
+      <div class="notes-workspace">
+        <!-- Notes Sidebar: List of Markdown notes -->
+        <div class="notes-sidebar">
+          <div class="notes-sidebar-header">
+            <h3><i class="fa-solid fa-bookmark text-mint"></i> Danh Sách Ghi Chú</h3>
+            <button class="btn-icon-sm" id="btn-create-note" title="Tạo ghi chú mới">
+              <i class="fa-solid fa-plus"></i>
             </button>
-            <div class="breadcrumb-trail" id="breadcrumb-trail"></div>
           </div>
+          <div class="notes-list" id="notes-list-container">
+            <!-- Dynamic note items -->
+          </div>
+        </div>
 
-          <div class="toolbar-actions">
-            <!-- Search input -->
-            <div class="search-box">
-              <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input type="text" id="file-search-input" placeholder="Tìm tệp hoặc thư mục...">
-              <button class="search-clear-btn" id="search-clear-btn" style="display:none;">
-                <i class="fa-solid fa-xmark"></i>
+        <!-- Notes Main Editor / Viewer -->
+        <div class="notes-editor-pane">
+          <div class="note-toolbar">
+            <div class="note-info-bar">
+              <input type="text" id="note-title-input" class="note-title-field" placeholder="Tiêu đề bài ghi chú (Ví dụ: Toan_GiaiTich_Chuong1.md)">
+              <span class="note-status-badge" id="note-save-status">Đã đồng bộ</span>
+            </div>
+            <div class="note-actions">
+              <div class="note-mode-toggle">
+                <button class="mode-btn active" id="btn-note-split" title="Chia đôi màn hình"><i class="fa-solid fa-table-columns"></i></button>
+                <button class="mode-btn" id="btn-note-edit-only" title="Chỉ soạn thảo"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="mode-btn" id="btn-note-preview-only" title="Chỉ xem trước"><i class="fa-regular fa-eye"></i></button>
+              </div>
+              <button class="btn-primary-action" id="btn-save-note-github">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Lưu Lên GitHub</span>
               </button>
             </div>
-
-            <!-- View Toggle -->
-            <div class="view-toggle">
-              <button class="view-btn active" id="view-grid-btn" title="Dạng lưới"><i class="fa-solid fa-grip"></i></button>
-              <button class="view-btn" id="view-list-btn" title="Dạng danh sách"><i class="fa-solid fa-list"></i></button>
-            </div>
-
-            <!-- Action Buttons -->
-            <button class="btn-secondary" id="btn-new-folder">
-              <i class="fa-solid fa-folder-plus"></i>
-              <span>Tạo Thư mục</span>
-            </button>
-            <button class="btn-secondary" id="btn-new-file">
-              <i class="fa-solid fa-file-circle-plus"></i>
-              <span>Tạo Tệp mới</span>
-            </button>
-            <button class="btn-primary" id="btn-upload-trigger">
-              <i class="fa-solid fa-arrow-up-from-bracket"></i>
-              <span>Tải lên tệp</span>
-            </button>
-            <input type="file" id="file-input-hidden" multiple style="display:none;">
-          </div>
-        </div>
-
-        <!-- Drag & Drop Upload Zone -->
-        <div class="dropzone" id="upload-dropzone">
-          <div class="dropzone-content">
-            <div class="dropzone-icon">
-              <i class="fa-solid fa-cloud-arrow-up"></i>
-            </div>
-            <h4 class="dropzone-title">Kéo & thả tệp tin vào đây để tải lên GitHub Repo</h4>
-            <p class="dropzone-desc">Hỗ trợ hình ảnh, video, PDF, tài liệu, âm thanh, JSON, Markdown và mã nguồn (Tối đa 100MB qua GitHub REST API)</p>
-            <button class="btn-outline" id="btn-browse-files">
-              <i class="fa-regular fa-folder-open"></i> Chọn tệp từ máy tính
-            </button>
-          </div>
-          <!-- Upload Progress Overlay -->
-          <div class="upload-progress-wrapper" id="upload-progress-wrapper" style="display: none;">
-            <div class="progress-info">
-              <span id="upload-status-text">Đang tải lên và commit vào GitHub...</span>
-              <span id="upload-percent-text">0%</span>
-            </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill" id="upload-progress-bar" style="width: 0%;"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- File Explorer Container -->
-        <div class="explorer-body">
-          <div class="file-grid" id="file-explorer-grid">
-            <!-- Dynamic file items will be rendered here -->
           </div>
 
-          <!-- Empty State -->
-          <div class="empty-state" id="explorer-empty-state" style="display: none;">
-            <div class="empty-state-icon">
-              <i class="fa-regular fa-folder-open"></i>
+          <div class="note-panels-container split-view" id="note-panels-container">
+            <!-- Raw Markdown Editor -->
+            <div class="note-edit-panel">
+              <textarea id="note-markdown-textarea" class="markdown-textarea" placeholder="Nhập ghi chú bằng Markdown tại đây...
+# Ví dụ Chương 1: Giới thiệu
+- Khái niệm cơ bản
+- Công thức trọng tâm: E = mc^2
+```python
+# Code mẫu bài tập
+def tinh_diem(a, b):
+    return (a + b) / 2
+```"></textarea>
             </div>
-            <h3>Thư mục này hiện đang trống</h3>
-            <p>Hãy tải lên tệp tin đầu tiên hoặc tạo thư mục mới để bắt đầu lưu trữ.</p>
-            <button class="btn-primary" id="btn-empty-upload">
-              <i class="fa-solid fa-cloud-arrow-up"></i> Tải tệp lên ngay
-            </button>
-          </div>
 
-          <!-- Loading State -->
-          <div class="loading-state" id="explorer-loading-state">
-            <div class="spinner"></div>
-            <p>Đang đồng bộ dữ liệu với GitHub Repository...</p>
+            <!-- Live Rendered Preview -->
+            <div class="note-preview-panel" id="note-rendered-preview">
+              <div class="markdown-rendered-body" id="markdown-rendered-body">
+                <!-- Live HTML from marked.js -->
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== TAB 2: DATABASE (DATA VAULT) ==================== -->
-    <section class="tab-pane" id="database-tab">
-      <div class="pane-layout">
-        <div class="db-header">
-          <div class="db-title-area">
-            <h2><i class="fa-solid fa-database text-cyan"></i> Data Vault (Cơ Sở Dữ Liệu JSON)</h2>
-            <p>Tạo và quản lý các bảng dữ liệu dạng JSON trực tiếp trên GitHub Repository. Thêm, sửa, xóa, tìm kiếm bản ghi với giao diện trực quan.</p>
+    <!-- ==================== TAB 3: NGÂN HÀNG ĐỀ THI & BÀI TẬP ==================== -->
+    <section class="tab-content" id="tab-exam-bank">
+      <div class="exams-container">
+        <!-- Exam Bank Header -->
+        <div class="exam-header-bar">
+          <div class="exam-header-title">
+            <h2><i class="fa-solid fa-bullseye text-mint"></i> Ngân Hàng Đề Thi & Bài Tập Ôn Luyện</h2>
+            <p>Quản lý và lưu trữ đề kiểm tra, đề thi giữa kỳ, cuối kỳ kèm đáp án chi tiết cho từng môn học.</p>
           </div>
-          <div class="db-actions">
-            <div class="db-selector-wrapper">
-              <label for="db-file-select"><i class="fa-solid fa-table"></i> Chọn bảng dữ liệu:</label>
-              <select id="db-file-select" class="custom-select">
-                <!-- Options populated dynamically -->
-                <option value="data/records.json">data/records.json (Mặc định)</option>
-              </select>
-            </div>
-            <button class="btn-secondary" id="btn-new-db-table">
-              <i class="fa-solid fa-plus"></i> Tạo Bảng Mới
+          <div class="exam-header-tools">
+            <button class="btn-primary-action" id="btn-open-add-exam-modal">
+              <i class="fa-solid fa-plus"></i>
+              <span>Thêm Đề Thi Mới</span>
             </button>
-            <button class="btn-primary" id="btn-add-db-record">
-              <i class="fa-solid fa-plus"></i> Thêm Bản Ghi Mới
-            </button>
-            <button class="btn-outline" id="btn-export-db">
-              <i class="fa-solid fa-file-export"></i> Xuất File
+            <button class="btn-subtle" id="btn-export-exam-data">
+              <i class="fa-solid fa-file-export"></i>
+              <span>Xuất Dữ Liệu</span>
             </button>
           </div>
         </div>
 
-        <!-- Database Table View -->
-        <div class="db-table-container">
-          <div class="db-search-bar">
-            <div class="search-box">
-              <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input type="text" id="db-search-input" placeholder="Tìm kiếm trong bảng dữ liệu...">
-            </div>
-            <span class="db-record-count" id="db-record-count">0 bản ghi</span>
+        <!-- Filter & Search Exam -->
+        <div class="exam-filter-row">
+          <div class="search-input-pill">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="exam-search-input" placeholder="Lọc đề thi theo tên hoặc môn học...">
           </div>
+          <div class="exam-status-counts" id="exam-status-summary">
+            <span class="count-badge total">0 Đề thi</span>
+          </div>
+        </div>
 
+        <!-- Exam Table -->
+        <div class="exam-table-card">
           <div class="table-responsive">
-            <table class="custom-table" id="db-records-table">
+            <table class="modern-table" id="exams-table">
               <thead>
-                <tr id="db-table-headers">
-                  <th>ID</th>
-                  <th>Tiêu đề / Tên</th>
-                  <th>Danh mục</th>
-                  <th>Nội dung / Giá trị</th>
-                  <th>Ngày tạo</th>
-                  <th>Hành động</th>
+                <tr>
+                  <th>Tên Đề Thi / Bài Kiểm Tra</th>
+                  <th>Môn Học</th>
+                  <th>Học Kỳ / Năm</th>
+                  <th>Mức Độ</th>
+                  <th>Trạng Thái Ôn Luyện</th>
+                  <th>File Đề & Đáp Án</th>
+                  <th>Hành Động</th>
                 </tr>
               </thead>
-              <tbody id="db-table-body">
-                <!-- Dynamic rows -->
+              <tbody id="exams-table-body">
+                <!-- Populated dynamically from data/exams.json -->
               </tbody>
             </table>
           </div>
 
-          <div class="empty-state" id="db-empty-state" style="display: none;">
-            <div class="empty-state-icon">
-              <i class="fa-solid fa-table-list"></i>
-            </div>
-            <h3>Bảng dữ liệu đang trống</h3>
-            <p>Bấm nút "Thêm Bản Ghi Mới" để lưu trữ dữ liệu đầu tiên vào GitHub.</p>
+          <div class="empty-exam-state" id="empty-exam-state" style="display: none;">
+            <i class="fa-solid fa-clipboard-question"></i>
+            <h4>Chưa có đề thi nào trong ngân hàng</h4>
+            <p>Bấm nút "Thêm Đề Thi Mới" để lưu đề ôn tập đầu tiên vào kho GitHub của bạn.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== TAB 3: CDN LINK GENERATOR ==================== -->
-    <section class="tab-pane" id="cdn-tab">
-      <div class="pane-layout">
-        <div class="cdn-header">
-          <h2><i class="fa-solid fa-bolt text-indigo"></i> Trình Tạo Link CDN & Public Embed</h2>
-          <p>Chuyển đổi bất kỳ tệp tin nào trong GitHub Repository thành đường dẫn CDN tốc độ cao toàn cầu (jsDelivr, GitHub Raw, Statically) hoặc mã chèn website (HTML, Markdown, CSS, JS).</p>
-        </div>
-
-        <div class="cdn-generator-card">
-          <div class="form-group">
-            <label for="cdn-file-path-input">Đường dẫn tệp trong Repository (Ví dụ: <code>images/banner.png</code> hoặc <code>data/products.json</code>):</label>
-            <div class="input-with-btn">
-              <input type="text" id="cdn-file-path-input" class="form-input" placeholder="Nhập đường dẫn file trong repo...">
-              <button class="btn-primary" id="btn-generate-cdn">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Tạo Link
-              </button>
-            </div>
-          </div>
-
-          <div class="cdn-results-grid" id="cdn-results-container">
-            <!-- jsDelivr CDN -->
-            <div class="cdn-result-item">
-              <div class="cdn-item-header">
-                <div class="cdn-item-badge badge-fast">jsDelivr CDN (Tốc độ cao nhất)</div>
-                <button class="btn-copy-sm" data-copy-target="cdn-url-jsdelivr" title="Sao chép">
-                  <i class="fa-regular fa-copy"></i>
-                </button>
-              </div>
-              <input type="text" readonly id="cdn-url-jsdelivr" class="cdn-input-readonly" value="https://cdn.jsdelivr.net/gh/owner/repo@main/file">
-            </div>
-
-            <!-- GitHub Raw -->
-            <div class="cdn-result-item">
-              <div class="cdn-item-header">
-                <div class="cdn-item-badge">GitHub Raw URL</div>
-                <button class="btn-copy-sm" data-copy-target="cdn-url-raw" title="Sao chép">
-                  <i class="fa-regular fa-copy"></i>
-                </button>
-              </div>
-              <input type="text" readonly id="cdn-url-raw" class="cdn-input-readonly" value="https://raw.githubusercontent.com/owner/repo/main/file">
-            </div>
-
-            <!-- HTML Image Embed -->
-            <div class="cdn-result-item">
-              <div class="cdn-item-header">
-                <div class="cdn-item-badge">Mã HTML nhúng ảnh</div>
-                <button class="btn-copy-sm" data-copy-target="cdn-url-html-img" title="Sao chép">
-                  <i class="fa-regular fa-copy"></i>
-                </button>
-              </div>
-              <input type="text" readonly id="cdn-url-html-img" class="cdn-input-readonly" value='<img src="..." alt="File">' >
-            </div>
-
-            <!-- Markdown Embed -->
-            <div class="cdn-result-item">
-              <div class="cdn-item-header">
-                <div class="cdn-item-badge">Mã Markdown nhúng ảnh</div>
-                <button class="btn-copy-sm" data-copy-target="cdn-url-markdown" title="Sao chép">
-                  <i class="fa-regular fa-copy"></i>
-                </button>
-              </div>
-              <input type="text" readonly id="cdn-url-markdown" class="cdn-input-readonly" value="![Tệp](https://...)">
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 4: HƯỚNG DẪN ==================== -->
-    <section class="tab-pane" id="guide-tab">
-      <div class="pane-layout guide-content">
-        <h2><i class="fa-solid fa-graduation-cap text-purple"></i> Hướng Dẫn Sử Dụng & Triển Khai GitVault</h2>
-        
-        <div class="guide-grid">
-          <div class="guide-card">
-            <div class="guide-number">1</div>
-            <h3>Chuẩn bị GitHub Repository</h3>
-            <p>Tạo một kho lưu trữ mới trên GitHub (có thể đặt là <strong>Public</strong> để ai cũng xem được tệp hoặc <strong>Private</strong> nếu muốn bảo mật).</p>
-            <ul>
-              <li>Vào <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a></li>
-              <li>Đặt tên repository (Ví dụ: <code>my-cloud-storage</code>)</li>
-              <li>Tích chọn <strong>Add a README file</strong> để khởi tạo nhánh <code>main</code></li>
-            </ul>
-          </div>
-
-          <div class="guide-card">
-            <div class="guide-number">2</div>
-            <h3>Tạo Personal Access Token (PAT)</h3>
-            <p>Token là chìa khóa để trang web có thể ghi, sửa, xóa dữ liệu vào Repository của bạn một cách an toàn:</p>
-            <ul>
-              <li>Vào <strong>Settings &gt; Developer Settings &gt; Personal access tokens &gt; Fine-grained tokens</strong></li>
-              <li>Bấm <strong>Generate new token</strong></li>
-              <li>Chọn <strong>Repository access: Only select repositories</strong> &gt; Chọn repo vừa tạo</li>
-              <li>Tại mục <strong>Permissions &gt; Repository permissions</strong>, cấp quyền <strong>Contents: Read and write</strong></li>
-              <li>Copy mã Token và dán vào phần <strong>Cấu hình Repo</strong> trên trang web này</li>
-            </ul>
-          </div>
-
-          <div class="guide-card">
-            <div class="guide-number">3</div>
-            <h3>Công khai Web trên GitHub Pages (Free 100%)</h3>
-            <p>Để xuất bản trang web này ra internet để bất kỳ ai cũng có thể truy cập:</p>
-            <ul>
-              <li>Đẩy source code của trang web này lên GitHub Repository của bạn</li>
-              <li>Vào tab <strong>Settings &gt; Pages</strong> trong repo của bạn</li>
-              <li>Tại mục <strong>Build and deployment &gt; Source</strong>, chọn <strong>Deploy from a branch</strong> &gt; Nhánh <code>main</code> (hoặc <code>/root</code>)</li>
-              <li>Bấm <strong>Save</strong>. Sau 1 phút, trang web sẽ online tại: <code>https://username.github.io/repo-name</code></li>
-            </ul>
-          </div>
-
-          <div class="guide-card">
-            <div class="guide-number">4</div>
-            <h3>Bảo Mật & An Toàn Dữ Liệu</h3>
-            <p>Token của bạn được lưu <strong>cục bộ trong trình duyệt của bạn (LocalStorage)</strong> và không bao giờ gửi qua bất kỳ máy chủ bên thứ ba nào. Mọi thao tác đều giao tiếp trực tiếp tới API chính thức của GitHub (<code>api.github.com</code>).</p>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
   <!-- ==================== MODALS ==================== -->
 
   <!-- Modal 1: Settings / Repo Config -->
-  <div class="modal-overlay" id="settings-modal" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">
-          <i class="fa-solid fa-sliders text-indigo"></i>
-          <h3>Cấu hình Kết Nối GitHub Repository</h3>
-        </div>
-        <button class="modal-close-btn" id="btn-close-settings"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal-backdrop" id="modal-settings" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-head">
+        <h3><i class="fa-solid fa-sliders text-mint"></i> Cấu Hình Kho Dữ Liệu GitHub</h3>
+        <button class="modal-close" id="btn-close-settings"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
-      <div class="modal-body">
-        <form id="settings-form" onsubmit="return false;">
-          <div class="form-group">
-            <label for="input-repo-owner">GitHub Username / Tổ chức (Owner) <span class="text-danger">*</span></label>
-            <input type="text" id="input-repo-owner" class="form-input" placeholder="Ví dụ: your-username" required>
+      <div class="modal-content">
+        <form id="form-settings" onsubmit="return false;">
+          <div class="form-item">
+            <label>GitHub Username (Owner)</label>
+            <input type="text" id="cfg-owner" class="clean-input" value="AnNguyen-Script" required>
           </div>
-
-          <div class="form-group">
-            <label for="input-repo-name">Tên Repository (Kho dữ liệu) <span class="text-danger">*</span></label>
-            <input type="text" id="input-repo-name" class="form-input" placeholder="Ví dụ: my-cloud-storage" required>
+          <div class="form-item">
+            <label>Tên Repository Dữ Liệu</label>
+            <input type="text" id="cfg-repo" class="clean-input" value="DataHocTap" required>
           </div>
-
-          <div class="form-group">
-            <label for="input-repo-branch">Nhánh lưu trữ (Branch)</label>
-            <input type="text" id="input-repo-branch" class="form-input" placeholder="Mặc định: main" value="main">
+          <div class="form-item">
+            <label>Nhánh (Branch)</label>
+            <input type="text" id="cfg-branch" class="clean-input" value="main">
           </div>
-
-          <div class="form-group">
-            <div class="label-with-hint">
-              <label for="input-repo-token">Personal Access Token (PAT)</label>
-              <a href="https://github.com/settings/tokens?type=beta" target="_blank" class="hint-link">Tạo Token &rarr;</a>
+          <div class="form-item">
+            <div class="label-row">
+              <label>Personal Access Token (PAT)</label>
+              <a href="https://github.com/settings/tokens?type=beta" target="_blank" class="text-link">Tạo Token &rarr;</a>
             </div>
-            <div class="password-input-wrapper">
-              <input type="password" id="input-repo-token" class="form-input" placeholder="ghp_... hoặc github_pat_... (Bỏ trống nếu chỉ xem Public)">
-              <button type="button" class="btn-toggle-password" id="btn-toggle-pat">
-                <i class="fa-regular fa-eye"></i>
-              </button>
+            <div class="password-wrapper">
+              <input type="password" id="cfg-token" class="clean-input" placeholder="github_pat_... (Bắt buộc nếu muốn Upload)">
+              <button type="button" class="btn-toggle-eye" id="btn-toggle-cfg-token"><i class="fa-regular fa-eye"></i></button>
             </div>
-            <small class="form-help-text">Nếu không có Token, bạn vẫn xem và tải được dữ liệu từ các Repository Public ở chế độ Read-Only.</small>
+            <small class="help-text">Token chỉ lưu an toàn trong trình duyệt của bạn (LocalStorage) để thực hiện quyền tải lên.</small>
           </div>
-
-          <!-- Connection Test Feedback -->
-          <div class="connection-feedback" id="connection-feedback" style="display:none;"></div>
+          <div class="feedback-box" id="cfg-feedback" style="display: none;"></div>
         </form>
       </div>
-
-      <div class="modal-footer">
-        <button class="btn-secondary" id="btn-test-connection">
-          <i class="fa-solid fa-vial"></i> Kiểm tra kết nối
-        </button>
-        <button class="btn-primary" id="btn-save-settings">
-          <i class="fa-solid fa-floppy-disk"></i> Lưu & Kết nối
-        </button>
+      <div class="modal-foot">
+        <button class="btn-subtle" id="btn-test-cfg">Kiểm Tra Kết Nối</button>
+        <button class="btn-primary-action" id="btn-save-cfg">Lưu Cấu Hình</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 2: File Previewer & Editor -->
-  <div class="modal-overlay modal-large" id="preview-modal" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">
-          <i class="fa-regular fa-file" id="preview-file-icon"></i>
-          <h3 id="preview-file-title">Tên tệp tin</h3>
+  <!-- Modal 2: Multi-format File Viewer & Reader -->
+  <div class="modal-backdrop modal-wide" id="modal-viewer" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-head">
+        <div class="viewer-title-group">
+          <i class="fa-regular fa-file" id="viewer-file-icon"></i>
+          <h3 id="viewer-file-name">Tên tài liệu</h3>
         </div>
-        <div class="modal-header-actions">
-          <button class="btn-secondary-sm" id="btn-preview-copy-cdn" title="Sao chép link CDN jsDelivr">
-            <i class="fa-solid fa-bolt"></i> Copy CDN Link
-          </button>
-          <a href="#" target="_blank" class="btn-secondary-sm" id="btn-preview-download" title="Tải xuống tệp">
-            <i class="fa-solid fa-download"></i> Tải về
-          </a>
-          <button class="btn-danger-sm" id="btn-preview-delete" title="Xóa tệp khỏi GitHub">
-            <i class="fa-regular fa-trash-can"></i> Xóa
-          </button>
-          <button class="modal-close-btn" id="btn-close-preview"><i class="fa-solid fa-xmark"></i></button>
+        <div class="viewer-actions">
+          <button class="btn-subtle-sm" id="btn-viewer-copy-cdn"><i class="fa-solid fa-bolt"></i> Copy CDN Link</button>
+          <a href="#" target="_blank" class="btn-subtle-sm" id="btn-viewer-download"><i class="fa-solid fa-download"></i> Tải Về</a>
+          <button class="btn-danger-sm" id="btn-viewer-delete"><i class="fa-regular fa-trash-can"></i> Xóa</button>
+          <button class="modal-close" id="btn-close-viewer"><i class="fa-solid fa-xmark"></i></button>
         </div>
       </div>
-
-      <div class="modal-body preview-modal-body" id="preview-modal-body">
-        <!-- Dynamic preview content (Image, Code Editor, Markdown, PDF, Video, Audio) -->
+      <div class="modal-content viewer-body" id="viewer-body-content">
+        <!-- PDF / Image / Video / Code dynamically rendered -->
       </div>
-
-      <div class="modal-footer preview-modal-footer" id="preview-modal-footer" style="display: none;">
-        <div class="editor-status" id="editor-status-text">Đã mở trình chỉnh sửa mã nguồn</div>
-        <button class="btn-primary" id="btn-save-file-changes">
-          <i class="fa-solid fa-cloud-arrow-up"></i> Lưu thay đổi & Commit vào GitHub
+      <div class="modal-foot viewer-foot" id="viewer-foot" style="display: none;">
+        <span class="editor-note-hint">Đã bật chế độ chỉnh sửa trực tiếp mã nguồn</span>
+        <button class="btn-primary-action" id="btn-viewer-save-changes">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Lưu & Commit Lên GitHub
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 3: New Folder -->
-  <div class="modal-overlay" id="folder-modal" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">
-          <i class="fa-solid fa-folder-plus text-indigo"></i>
-          <h3>Tạo Thư Mục Mới</h3>
-        </div>
-        <button class="modal-close-btn" id="btn-close-folder-modal"><i class="fa-solid fa-xmark"></i></button>
+  <!-- Modal 3: Create Folder / Subject -->
+  <div class="modal-backdrop" id="modal-folder" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-head">
+        <h3><i class="fa-solid fa-folder-plus text-mint"></i> Tạo Thư Mục Môn Học Mới</h3>
+        <button class="modal-close" id="btn-close-folder"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="input-folder-name">Tên thư mục <span class="text-danger">*</span></label>
-          <input type="text" id="input-folder-name" class="form-input" placeholder="Ví dụ: images, documents, backup...">
-          <small class="form-help-text">GitHub sẽ tạo một tệp <code>.gitkeep</code> để khởi tạo thư mục này.</small>
+      <div class="modal-content">
+        <div class="form-item">
+          <label>Tên thư mục môn học (Ví dụ: <code>LapTrinhWeb</code>, <code>GiaiTich_1</code>, <code>TiengAnh_B2</code>)</label>
+          <input type="text" id="input-new-folder-name" class="clean-input" placeholder="Nhập tên thư mục...">
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="btn-cancel-folder">Hủy</button>
-        <button class="btn-primary" id="btn-confirm-create-folder">Tạo Thư Mục</button>
+      <div class="modal-foot">
+        <button class="btn-subtle" id="btn-cancel-folder">Hủy</button>
+        <button class="btn-primary-action" id="btn-confirm-folder">Tạo Thư Mục</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 4: New Text / Code File -->
-  <div class="modal-overlay" id="new-file-modal" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">
-          <i class="fa-solid fa-file-circle-plus text-cyan"></i>
-          <h3>Tạo Tệp Tin Mới</h3>
-        </div>
-        <button class="modal-close-btn" id="btn-close-new-file-modal"><i class="fa-solid fa-xmark"></i></button>
+  <!-- Modal 4: Add Exam / Assignment -->
+  <div class="modal-backdrop" id="modal-exam" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-head">
+        <h3><i class="fa-solid fa-bullseye text-mint"></i> Thêm Đề Thi / Bài Tập Ôn Luyện</h3>
+        <button class="modal-close" id="btn-close-exam"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="input-new-filename">Tên tệp tin (kèm đuôi mở rộng) <span class="text-danger">*</span></label>
-          <input type="text" id="input-new-filename" class="form-input" placeholder="Ví dụ: note.md, data.json, config.js, index.html...">
-        </div>
-        <div class="form-group">
-          <label for="input-new-filecontent">Nội dung ban đầu</label>
-          <textarea id="input-new-filecontent" class="form-textarea code-font" rows="8" placeholder="Nhập nội dung văn bản, markdown hoặc code..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="btn-cancel-new-file">Hủy</button>
-        <button class="btn-primary" id="btn-confirm-create-file">Tạo & Lưu vào GitHub</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 5: Database Record Editor (Add / Edit Record) -->
-  <div class="modal-overlay" id="record-modal" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">
-          <i class="fa-solid fa-pen-to-square text-cyan"></i>
-          <h3 id="record-modal-title">Thêm Bản Ghi Mới Vào Database</h3>
-        </div>
-        <button class="modal-close-btn" id="btn-close-record-modal"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal-body">
-        <form id="record-form" onsubmit="return false;">
-          <input type="hidden" id="record-edit-id">
-          <div class="form-group">
-            <label for="record-input-title">Tiêu đề / Tên bản ghi <span class="text-danger">*</span></label>
-            <input type="text" id="record-input-title" class="form-input" placeholder="Nhập tiêu đề hoặc tên..." required>
+      <div class="modal-content">
+        <form id="form-exam" onsubmit="return false;">
+          <input type="hidden" id="exam-edit-id">
+          <div class="form-item">
+            <label>Tên đề thi / Bài kiểm tra <span class="text-danger">*</span></label>
+            <input type="text" id="exam-in-title" class="clean-input" placeholder="Ví dụ: Đề thi giữa kỳ Giải tích 1 - Năm 2025" required>
           </div>
-          <div class="form-group">
-            <label for="record-input-category">Danh mục / Phân loại</label>
-            <input type="text" id="record-input-category" class="form-input" placeholder="Ví dụ: Công việc, Cá nhân, Sản phẩm...">
+          <div class="form-item">
+            <label>Môn học <span class="text-danger">*</span></label>
+            <input type="text" id="exam-in-subject" class="clean-input" placeholder="Ví dụ: Toán Cao Cấp, Lập Trình C++, Tiếng Anh..." required>
           </div>
-          <div class="form-group">
-            <label for="record-input-content">Nội dung / Chi tiết (Text hoặc JSON)</label>
-            <textarea id="record-input-content" class="form-textarea" rows="5" placeholder="Nhập nội dung dữ liệu..."></textarea>
+          <div class="form-grid-2">
+            <div class="form-item">
+              <label>Học kỳ / Năm</label>
+              <input type="text" id="exam-in-term" class="clean-input" placeholder="HK1 2025-2026">
+            </div>
+            <div class="form-item">
+              <label>Mức độ khó</label>
+              <select id="exam-in-difficulty" class="clean-select">
+                <option value="Dễ">🟢 Dễ (Cơ bản)</option>
+                <option value="Trung bình" selected>🟡 Trung bình</option>
+                <option value="Khó">🔴 Khó (Nâng cao)</option>
+              </select>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="record-input-tags">Thẻ (Tags - cách nhau bằng dấu phẩy)</label>
-            <input type="text" id="record-input-tags" class="form-input" placeholder="tag1, tag2, important">
+          <div class="form-item">
+            <label>Trạng thái ôn tập</label>
+            <select id="exam-in-status" class="clean-select">
+              <option value="Chưa làm">⚪ Chưa làm</option>
+              <option value="Đang ôn">🟡 Đang ôn luyện</option>
+              <option value="Cần ôn lại">🔴 Cần ôn lại kỹ</option>
+              <option value="Đã hoàn thành">🟢 Đã hoàn thành (100%)</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>Đường dẫn tệp đề thi / Đáp án (Trong kho hoặc link ngoài)</label>
+            <input type="text" id="exam-in-link" class="clean-input" placeholder="Ví dụ: Toan/DeThi2025.pdf hoặc link Google Drive...">
           </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="btn-cancel-record">Hủy</button>
-        <button class="btn-primary" id="btn-save-record">Lưu Bản Ghi</button>
+      <div class="modal-foot">
+        <button class="btn-subtle" id="btn-cancel-exam">Hủy</button>
+        <button class="btn-primary-action" id="btn-save-exam">Lưu Đề Thi</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
-  <div class="toast-container" id="toast-container"></div>
+  <!-- Toast Notifications Container -->
+  <div class="toast-hub" id="toast-hub"></div>
 
-  <!-- Application Scripts -->
+  <!-- Application Logic Scripts -->
   <script src="js/github-api.js"></script>
   <script src="js/storage-manager.js"></script>
   <script src="js/app.js"></script>
