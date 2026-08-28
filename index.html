@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitVault - Hệ Thống Lưu Trữ Dữ Liệu & Cloud Drive Trên GitHub</title>
+  <meta name="description" content="Nền tảng lưu trữ tệp tin, hình ảnh và cơ sở dữ liệu JSON/Markdown thời gian thực sử dụng GitHub Repository & REST API làm Backend.">
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Highlight.js for Code & Markdown Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  
+  <!-- Marked.js for Live Markdown Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+  <!-- Background Glow Accents -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-glow-3"></div>
+
+  <!-- Header Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <i class="fa-brands fa-github-alt"></i>
+          <span class="pulse-dot"></span>
+        </div>
+        <div class="brand-info">
+          <h1 class="brand-title">GitVault <span class="badge-tag">Cloud Storage & DB</span></h1>
+          <p class="brand-subtitle">Powered by GitHub Public/Private Repository</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="header-nav">
+        <button class="nav-tab active" data-tab="drive-tab" id="tab-btn-drive">
+          <i class="fa-solid fa-hard-drive"></i>
+          <span>Cloud Drive</span>
+        </button>
+        <button class="nav-tab" data-tab="database-tab" id="tab-btn-database">
+          <i class="fa-solid fa-database"></i>
+          <span>Data Vault (JSON DB)</span>
+        </button>
+        <button class="nav-tab" data-tab="cdn-tab" id="tab-btn-cdn">
+          <i class="fa-solid fa-bolt"></i>
+          <span>CDN Links</span>
+        </button>
+        <button class="nav-tab" data-tab="guide-tab" id="tab-btn-guide">
+          <i class="fa-solid fa-book-open"></i>
+          <span>Hướng dẫn</span>
+        </button>
+      </nav>
+
+      <!-- User & Settings Action -->
+      <div class="header-actions">
+        <div class="repo-badge" id="current-repo-badge" title="Repository hiện tại">
+          <span class="status-indicator online" id="status-indicator"></span>
+          <span class="repo-name-text" id="repo-badge-name">Chưa kết nối</span>
+        </div>
+
+        <button class="btn-icon" id="btn-refresh" title="Làm mới dữ liệu">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+
+        <button class="btn-primary-glow" id="btn-open-settings">
+          <i class="fa-solid fa-gear"></i>
+          <span class="btn-text">Cấu hình Repo</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-main">
+    <!-- Storage Summary Bar -->
+    <section class="stats-banner">
+      <div class="stat-card">
+        <div class="stat-icon icon-indigo"><i class="fa-solid fa-folder-tree"></i></div>
+        <div class="stat-details">
+          <span class="stat-label">Tổng số tệp / thư mục</span>
+          <h3 class="stat-value" id="stat-total-items">0 mục</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-cyan"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+        <div class="stat-details">
+          <span class="stat-label">Chế độ kết nối</span>
+          <h3 class="stat-value" id="stat-auth-mode">Chế độ xem công khai (Read-Only)</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-purple"><i class="fa-solid fa-code-branch"></i></div>
+        <div class="stat-details">
+          <span class="stat-label">Nhánh hoạt động (Branch)</span>
+          <h3 class="stat-value" id="stat-current-branch">main</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-emerald"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="stat-details">
+          <span class="stat-label">Tốc độ & CDN</span>
+          <h3 class="stat-value text-success">jsDelivr Global CDN</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 1: CLOUD DRIVE ==================== -->
+    <section class="tab-pane active" id="drive-tab">
+      <div class="pane-layout">
+        <!-- Explorer Controls -->
+        <div class="toolbar">
+          <div class="breadcrumbs-container">
+            <button class="breadcrumb-item breadcrumb-root" id="breadcrumb-root">
+              <i class="fa-solid fa-house"></i>
+              <span>root</span>
+            </button>
+            <div class="breadcrumb-trail" id="breadcrumb-trail"></div>
+          </div>
+
+          <div class="toolbar-actions">
+            <!-- Search input -->
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="file-search-input" placeholder="Tìm tệp hoặc thư mục...">
+              <button class="search-clear-btn" id="search-clear-btn" style="display:none;">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="view-toggle">
+              <button class="view-btn active" id="view-grid-btn" title="Dạng lưới"><i class="fa-solid fa-grip"></i></button>
+              <button class="view-btn" id="view-list-btn" title="Dạng danh sách"><i class="fa-solid fa-list"></i></button>
+            </div>
+
+            <!-- Action Buttons -->
+            <button class="btn-secondary" id="btn-new-folder">
+              <i class="fa-solid fa-folder-plus"></i>
+              <span>Tạo Thư mục</span>
+            </button>
+            <button class="btn-secondary" id="btn-new-file">
+              <i class="fa-solid fa-file-circle-plus"></i>
+              <span>Tạo Tệp mới</span>
+            </button>
+            <button class="btn-primary" id="btn-upload-trigger">
+              <i class="fa-solid fa-arrow-up-from-bracket"></i>
+              <span>Tải lên tệp</span>
+            </button>
+            <input type="file" id="file-input-hidden" multiple style="display:none;">
+          </div>
+        </div>
+
+        <!-- Drag & Drop Upload Zone -->
+        <div class="dropzone" id="upload-dropzone">
+          <div class="dropzone-content">
+            <div class="dropzone-icon">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <h4 class="dropzone-title">Kéo & thả tệp tin vào đây để tải lên GitHub Repo</h4>
+            <p class="dropzone-desc">Hỗ trợ hình ảnh, video, PDF, tài liệu, âm thanh, JSON, Markdown và mã nguồn (Tối đa 100MB qua GitHub REST API)</p>
+            <button class="btn-outline" id="btn-browse-files">
+              <i class="fa-regular fa-folder-open"></i> Chọn tệp từ máy tính
+            </button>
+          </div>
+          <!-- Upload Progress Overlay -->
+          <div class="upload-progress-wrapper" id="upload-progress-wrapper" style="display: none;">
+            <div class="progress-info">
+              <span id="upload-status-text">Đang tải lên và commit vào GitHub...</span>
+              <span id="upload-percent-text">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="upload-progress-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Explorer Container -->
+        <div class="explorer-body">
+          <div class="file-grid" id="file-explorer-grid">
+            <!-- Dynamic file items will be rendered here -->
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state" id="explorer-empty-state" style="display: none;">
+            <div class="empty-state-icon">
+              <i class="fa-regular fa-folder-open"></i>
+            </div>
+            <h3>Thư mục này hiện đang trống</h3>
+            <p>Hãy tải lên tệp tin đầu tiên hoặc tạo thư mục mới để bắt đầu lưu trữ.</p>
+            <button class="btn-primary" id="btn-empty-upload">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Tải tệp lên ngay
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div class="loading-state" id="explorer-loading-state">
+            <div class="spinner"></div>
+            <p>Đang đồng bộ dữ liệu với GitHub Repository...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: DATABASE (DATA VAULT) ==================== -->
+    <section class="tab-pane" id="database-tab">
+      <div class="pane-layout">
+        <div class="db-header">
+          <div class="db-title-area">
+            <h2><i class="fa-solid fa-database text-cyan"></i> Data Vault (Cơ Sở Dữ Liệu JSON)</h2>
+            <p>Tạo và quản lý các bảng dữ liệu dạng JSON trực tiếp trên GitHub Repository. Thêm, sửa, xóa, tìm kiếm bản ghi với giao diện trực quan.</p>
+          </div>
+          <div class="db-actions">
+            <div class="db-selector-wrapper">
+              <label for="db-file-select"><i class="fa-solid fa-table"></i> Chọn bảng dữ liệu:</label>
+              <select id="db-file-select" class="custom-select">
+                <!-- Options populated dynamically -->
+                <option value="data/records.json">data/records.json (Mặc định)</option>
+              </select>
+            </div>
+            <button class="btn-secondary" id="btn-new-db-table">
+              <i class="fa-solid fa-plus"></i> Tạo Bảng Mới
+            </button>
+            <button class="btn-primary" id="btn-add-db-record">
+              <i class="fa-solid fa-plus"></i> Thêm Bản Ghi Mới
+            </button>
+            <button class="btn-outline" id="btn-export-db">
+              <i class="fa-solid fa-file-export"></i> Xuất File
+            </button>
+          </div>
+        </div>
+
+        <!-- Database Table View -->
+        <div class="db-table-container">
+          <div class="db-search-bar">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="db-search-input" placeholder="Tìm kiếm trong bảng dữ liệu...">
+            </div>
+            <span class="db-record-count" id="db-record-count">0 bản ghi</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table" id="db-records-table">
+              <thead>
+                <tr id="db-table-headers">
+                  <th>ID</th>
+                  <th>Tiêu đề / Tên</th>
+                  <th>Danh mục</th>
+                  <th>Nội dung / Giá trị</th>
+                  <th>Ngày tạo</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="db-table-body">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state" id="db-empty-state" style="display: none;">
+            <div class="empty-state-icon">
+              <i class="fa-solid fa-table-list"></i>
+            </div>
+            <h3>Bảng dữ liệu đang trống</h3>
+            <p>Bấm nút "Thêm Bản Ghi Mới" để lưu trữ dữ liệu đầu tiên vào GitHub.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: CDN LINK GENERATOR ==================== -->
+    <section class="tab-pane" id="cdn-tab">
+      <div class="pane-layout">
+        <div class="cdn-header">
+          <h2><i class="fa-solid fa-bolt text-indigo"></i> Trình Tạo Link CDN & Public Embed</h2>
+          <p>Chuyển đổi bất kỳ tệp tin nào trong GitHub Repository thành đường dẫn CDN tốc độ cao toàn cầu (jsDelivr, GitHub Raw, Statically) hoặc mã chèn website (HTML, Markdown, CSS, JS).</p>
+        </div>
+
+        <div class="cdn-generator-card">
+          <div class="form-group">
+            <label for="cdn-file-path-input">Đường dẫn tệp trong Repository (Ví dụ: <code>images/banner.png</code> hoặc <code>data/products.json</code>):</label>
+            <div class="input-with-btn">
+              <input type="text" id="cdn-file-path-input" class="form-input" placeholder="Nhập đường dẫn file trong repo...">
+              <button class="btn-primary" id="btn-generate-cdn">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Tạo Link
+              </button>
+            </div>
+          </div>
+
+          <div class="cdn-results-grid" id="cdn-results-container">
+            <!-- jsDelivr CDN -->
+            <div class="cdn-result-item">
+              <div class="cdn-item-header">
+                <div class="cdn-item-badge badge-fast">jsDelivr CDN (Tốc độ cao nhất)</div>
+                <button class="btn-copy-sm" data-copy-target="cdn-url-jsdelivr" title="Sao chép">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+              <input type="text" readonly id="cdn-url-jsdelivr" class="cdn-input-readonly" value="https://cdn.jsdelivr.net/gh/owner/repo@main/file">
+            </div>
+
+            <!-- GitHub Raw -->
+            <div class="cdn-result-item">
+              <div class="cdn-item-header">
+                <div class="cdn-item-badge">GitHub Raw URL</div>
+                <button class="btn-copy-sm" data-copy-target="cdn-url-raw" title="Sao chép">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+              <input type="text" readonly id="cdn-url-raw" class="cdn-input-readonly" value="https://raw.githubusercontent.com/owner/repo/main/file">
+            </div>
+
+            <!-- HTML Image Embed -->
+            <div class="cdn-result-item">
+              <div class="cdn-item-header">
+                <div class="cdn-item-badge">Mã HTML nhúng ảnh</div>
+                <button class="btn-copy-sm" data-copy-target="cdn-url-html-img" title="Sao chép">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+              <input type="text" readonly id="cdn-url-html-img" class="cdn-input-readonly" value='<img src="..." alt="File">' >
+            </div>
+
+            <!-- Markdown Embed -->
+            <div class="cdn-result-item">
+              <div class="cdn-item-header">
+                <div class="cdn-item-badge">Mã Markdown nhúng ảnh</div>
+                <button class="btn-copy-sm" data-copy-target="cdn-url-markdown" title="Sao chép">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+              <input type="text" readonly id="cdn-url-markdown" class="cdn-input-readonly" value="![Tệp](https://...)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: HƯỚNG DẪN ==================== -->
+    <section class="tab-pane" id="guide-tab">
+      <div class="pane-layout guide-content">
+        <h2><i class="fa-solid fa-graduation-cap text-purple"></i> Hướng Dẫn Sử Dụng & Triển Khai GitVault</h2>
+        
+        <div class="guide-grid">
+          <div class="guide-card">
+            <div class="guide-number">1</div>
+            <h3>Chuẩn bị GitHub Repository</h3>
+            <p>Tạo một kho lưu trữ mới trên GitHub (có thể đặt là <strong>Public</strong> để ai cũng xem được tệp hoặc <strong>Private</strong> nếu muốn bảo mật).</p>
+            <ul>
+              <li>Vào <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a></li>
+              <li>Đặt tên repository (Ví dụ: <code>my-cloud-storage</code>)</li>
+              <li>Tích chọn <strong>Add a README file</strong> để khởi tạo nhánh <code>main</code></li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <div class="guide-number">2</div>
+            <h3>Tạo Personal Access Token (PAT)</h3>
+            <p>Token là chìa khóa để trang web có thể ghi, sửa, xóa dữ liệu vào Repository của bạn một cách an toàn:</p>
+            <ul>
+              <li>Vào <strong>Settings &gt; Developer Settings &gt; Personal access tokens &gt; Fine-grained tokens</strong></li>
+              <li>Bấm <strong>Generate new token</strong></li>
+              <li>Chọn <strong>Repository access: Only select repositories</strong> &gt; Chọn repo vừa tạo</li>
+              <li>Tại mục <strong>Permissions &gt; Repository permissions</strong>, cấp quyền <strong>Contents: Read and write</strong></li>
+              <li>Copy mã Token và dán vào phần <strong>Cấu hình Repo</strong> trên trang web này</li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <div class="guide-number">3</div>
+            <h3>Công khai Web trên GitHub Pages (Free 100%)</h3>
+            <p>Để xuất bản trang web này ra internet để bất kỳ ai cũng có thể truy cập:</p>
+            <ul>
+              <li>Đẩy source code của trang web này lên GitHub Repository của bạn</li>
+              <li>Vào tab <strong>Settings &gt; Pages</strong> trong repo của bạn</li>
+              <li>Tại mục <strong>Build and deployment &gt; Source</strong>, chọn <strong>Deploy from a branch</strong> &gt; Nhánh <code>main</code> (hoặc <code>/root</code>)</li>
+              <li>Bấm <strong>Save</strong>. Sau 1 phút, trang web sẽ online tại: <code>https://username.github.io/repo-name</code></li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <div class="guide-number">4</div>
+            <h3>Bảo Mật & An Toàn Dữ Liệu</h3>
+            <p>Token của bạn được lưu <strong>cục bộ trong trình duyệt của bạn (LocalStorage)</strong> và không bao giờ gửi qua bất kỳ máy chủ bên thứ ba nào. Mọi thao tác đều giao tiếp trực tiếp tới API chính thức của GitHub (<code>api.github.com</code>).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1: Settings / Repo Config -->
+  <div class="modal-overlay" id="settings-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-sliders text-indigo"></i>
+          <h3>Cấu hình Kết Nối GitHub Repository</h3>
+        </div>
+        <button class="modal-close-btn" id="btn-close-settings"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="settings-form" onsubmit="return false;">
+          <div class="form-group">
+            <label for="input-repo-owner">GitHub Username / Tổ chức (Owner) <span class="text-danger">*</span></label>
+            <input type="text" id="input-repo-owner" class="form-input" placeholder="Ví dụ: your-username" required>
+          </div>
+
+          <div class="form-group">
+            <label for="input-repo-name">Tên Repository (Kho dữ liệu) <span class="text-danger">*</span></label>
+            <input type="text" id="input-repo-name" class="form-input" placeholder="Ví dụ: my-cloud-storage" required>
+          </div>
+
+          <div class="form-group">
+            <label for="input-repo-branch">Nhánh lưu trữ (Branch)</label>
+            <input type="text" id="input-repo-branch" class="form-input" placeholder="Mặc định: main" value="main">
+          </div>
+
+          <div class="form-group">
+            <div class="label-with-hint">
+              <label for="input-repo-token">Personal Access Token (PAT)</label>
+              <a href="https://github.com/settings/tokens?type=beta" target="_blank" class="hint-link">Tạo Token &rarr;</a>
+            </div>
+            <div class="password-input-wrapper">
+              <input type="password" id="input-repo-token" class="form-input" placeholder="ghp_... hoặc github_pat_... (Bỏ trống nếu chỉ xem Public)">
+              <button type="button" class="btn-toggle-password" id="btn-toggle-pat">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <small class="form-help-text">Nếu không có Token, bạn vẫn xem và tải được dữ liệu từ các Repository Public ở chế độ Read-Only.</small>
+          </div>
+
+          <!-- Connection Test Feedback -->
+          <div class="connection-feedback" id="connection-feedback" style="display:none;"></div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-test-connection">
+          <i class="fa-solid fa-vial"></i> Kiểm tra kết nối
+        </button>
+        <button class="btn-primary" id="btn-save-settings">
+          <i class="fa-solid fa-floppy-disk"></i> Lưu & Kết nối
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: File Previewer & Editor -->
+  <div class="modal-overlay modal-large" id="preview-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-regular fa-file" id="preview-file-icon"></i>
+          <h3 id="preview-file-title">Tên tệp tin</h3>
+        </div>
+        <div class="modal-header-actions">
+          <button class="btn-secondary-sm" id="btn-preview-copy-cdn" title="Sao chép link CDN jsDelivr">
+            <i class="fa-solid fa-bolt"></i> Copy CDN Link
+          </button>
+          <a href="#" target="_blank" class="btn-secondary-sm" id="btn-preview-download" title="Tải xuống tệp">
+            <i class="fa-solid fa-download"></i> Tải về
+          </a>
+          <button class="btn-danger-sm" id="btn-preview-delete" title="Xóa tệp khỏi GitHub">
+            <i class="fa-regular fa-trash-can"></i> Xóa
+          </button>
+          <button class="modal-close-btn" id="btn-close-preview"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <div class="modal-body preview-modal-body" id="preview-modal-body">
+        <!-- Dynamic preview content (Image, Code Editor, Markdown, PDF, Video, Audio) -->
+      </div>
+
+      <div class="modal-footer preview-modal-footer" id="preview-modal-footer" style="display: none;">
+        <div class="editor-status" id="editor-status-text">Đã mở trình chỉnh sửa mã nguồn</div>
+        <button class="btn-primary" id="btn-save-file-changes">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Lưu thay đổi & Commit vào GitHub
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: New Folder -->
+  <div class="modal-overlay" id="folder-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-folder-plus text-indigo"></i>
+          <h3>Tạo Thư Mục Mới</h3>
+        </div>
+        <button class="modal-close-btn" id="btn-close-folder-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="input-folder-name">Tên thư mục <span class="text-danger">*</span></label>
+          <input type="text" id="input-folder-name" class="form-input" placeholder="Ví dụ: images, documents, backup...">
+          <small class="form-help-text">GitHub sẽ tạo một tệp <code>.gitkeep</code> để khởi tạo thư mục này.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-folder">Hủy</button>
+        <button class="btn-primary" id="btn-confirm-create-folder">Tạo Thư Mục</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: New Text / Code File -->
+  <div class="modal-overlay" id="new-file-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-file-circle-plus text-cyan"></i>
+          <h3>Tạo Tệp Tin Mới</h3>
+        </div>
+        <button class="modal-close-btn" id="btn-close-new-file-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="input-new-filename">Tên tệp tin (kèm đuôi mở rộng) <span class="text-danger">*</span></label>
+          <input type="text" id="input-new-filename" class="form-input" placeholder="Ví dụ: note.md, data.json, config.js, index.html...">
+        </div>
+        <div class="form-group">
+          <label for="input-new-filecontent">Nội dung ban đầu</label>
+          <textarea id="input-new-filecontent" class="form-textarea code-font" rows="8" placeholder="Nhập nội dung văn bản, markdown hoặc code..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-new-file">Hủy</button>
+        <button class="btn-primary" id="btn-confirm-create-file">Tạo & Lưu vào GitHub</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Database Record Editor (Add / Edit Record) -->
+  <div class="modal-overlay" id="record-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-pen-to-square text-cyan"></i>
+          <h3 id="record-modal-title">Thêm Bản Ghi Mới Vào Database</h3>
+        </div>
+        <button class="modal-close-btn" id="btn-close-record-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="record-form" onsubmit="return false;">
+          <input type="hidden" id="record-edit-id">
+          <div class="form-group">
+            <label for="record-input-title">Tiêu đề / Tên bản ghi <span class="text-danger">*</span></label>
+            <input type="text" id="record-input-title" class="form-input" placeholder="Nhập tiêu đề hoặc tên..." required>
+          </div>
+          <div class="form-group">
+            <label for="record-input-category">Danh mục / Phân loại</label>
+            <input type="text" id="record-input-category" class="form-input" placeholder="Ví dụ: Công việc, Cá nhân, Sản phẩm...">
+          </div>
+          <div class="form-group">
+            <label for="record-input-content">Nội dung / Chi tiết (Text hoặc JSON)</label>
+            <textarea id="record-input-content" class="form-textarea" rows="5" placeholder="Nhập nội dung dữ liệu..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="record-input-tags">Thẻ (Tags - cách nhau bằng dấu phẩy)</label>
+            <input type="text" id="record-input-tags" class="form-input" placeholder="tag1, tag2, important">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-record">Hủy</button>
+        <button class="btn-primary" id="btn-save-record">Lưu Bản Ghi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/github-api.js"></script>
+  <script src="js/storage-manager.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
